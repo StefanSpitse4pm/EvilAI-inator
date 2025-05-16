@@ -1,4 +1,4 @@
-import React, {use, useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import { View, ScrollView, TextInput, StyleSheet, TouchableOpacity, Text, KeyboardAvoidingView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons} from '@expo/vector-icons';
@@ -19,11 +19,14 @@ export default function Chatbot() {
        }
        setMessages(prev => [...prev, userMessage])
        setInput('');
+    }
 
+    const newChat = (chat: []) => {
+        setMessages(chat)
     }
 
     const MessageWrapper = ({ message }) => {
-        return(
+        return (
             <View style= {[styles.messageContent, message.isAI ? styles.aiMessage : styles.userMessage]}>
                 <Text>{ message.text }</Text>
             </View>
@@ -70,7 +73,7 @@ export default function Chatbot() {
             />
             </TouchableOpacity>
         </KeyboardAvoidingView>
-        <ChatMenu ref={chatMenuRef}/>
+        <ChatMenu ref={chatMenuRef} onChangeChat={newChat}/>
     </SafeAreaView>
     )
 }
@@ -122,3 +125,4 @@ const styles = StyleSheet.create({
     }
 
 })
+

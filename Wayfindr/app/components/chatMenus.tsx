@@ -1,12 +1,17 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { Text, ScrollView, StyleSheet, View, SafeAreaView, Pressable} from 'react-native';
-const    ChatMenu = forwardRef((_, ref) => {
+import { Text, Button, ScrollView, StyleSheet, View, SafeAreaView, Pressable, TouchableWithoutFeedback, TouchableHighlight} from 'react-native';
+const ChatMenu = forwardRef(({ onChangeChat }, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const chatMenuHandeler = () => setIsVisible(prev => !prev);
+
+    const handleChatChange = (chat: []) => {
+        onChangeChat(chat)
+    }
 
     useImperativeHandle(ref, () => ({
         toggleChatMenu: chatMenuHandeler
     }));
+
 
     const testData = [
         {
@@ -28,8 +33,13 @@ const    ChatMenu = forwardRef((_, ref) => {
         isVisible && 
         <SafeAreaView style={styles.container}>
             <ScrollView style={styles.sidebar}>
+            <Text style={{padding: 10}}>Chats</Text>
             {testData.map(chat => (
-                <Text key={chat.id}> {chat.name} </Text>
+                <View key={chat.id}>
+                    <TouchableHighlight onPress={() => { handleChatChange(chat.messages)}}>
+                        <Text style={styles.menuItem}>{ chat.name }</Text>
+                    </TouchableHighlight>
+                </View>
             ))}
             </ScrollView>
             <Pressable style={styles.overlay} onPress={chatMenuHandeler}/>
@@ -70,7 +80,15 @@ const styles = StyleSheet.create({
         backgroundColor:'gray',
         opacity: 0.5,
         zIndex: 11,
+    },
+    menuItem: {
+        padding:10,
+        borderBottomWidth: 1,
+        borderBottomColor: 'gray',
+        backgroundColor:'#f5f5f5'
+
     }
+
 })
 
 export default ChatMenu;
