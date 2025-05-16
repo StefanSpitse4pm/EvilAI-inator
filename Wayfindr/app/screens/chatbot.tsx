@@ -1,27 +1,16 @@
-import React, {useRef, useState} from "react";
+import React, {use, useRef, useState} from "react";
 import { View, ScrollView, TextInput, StyleSheet, TouchableOpacity, Text, KeyboardAvoidingView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons} from '@expo/vector-icons';
-
-
-
-const Message = () => {
-    <View >
-        
-    </View>
-}
-
+import ChatMenu, { ChatMenuHandle } from "../components/chatMenus";
 export default function Chatbot() {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [messages, setMessages] = useState([
         {id: 1,text:'dit is een test', isAI:true}
     ])
-    
-    
-    
+    const chatMenuRef = useRef<ChatMenuHandle|null>(null);
 
-    // const scrollViewRef = useRef();
     const sendMessage = async () => {
        const userMessage = {
            id: messages.length + 1, 
@@ -41,12 +30,17 @@ export default function Chatbot() {
         )
     }
 
+
+        const handleClick = () => {
+        if (chatMenuRef.current) {
+            chatMenuRef.current?.toggleChatMenu(); // Call method on the ref
+        }
+    };
+
     return (
     <SafeAreaView style={styles.container}>
 
-
-        <ScrollView style={styles.messageContainer}
->
+        <ScrollView style={styles.messageContainer}>        
             {messages.map(message => (
           <MessageWrapper key={message.id} message={message} />
         ))}
@@ -54,6 +48,18 @@ export default function Chatbot() {
 
 
         <KeyboardAvoidingView style={styles.inputContainer}>
+
+            <TouchableOpacity
+            onPress={handleClick}
+            >  
+                <MaterialCommunityIcons
+                name="folder-open"
+                size={24}
+                color='#18aea9'
+                />
+            </TouchableOpacity>
+
+            
             <TextInput style={styles.mainInput} value={input} onChangeText={setInput} multiline onSubmitEditing={sendMessage} placeholder="Wat is je vraag?" />
             
             <TouchableOpacity onPress={sendMessage}>
@@ -64,6 +70,7 @@ export default function Chatbot() {
             />
             </TouchableOpacity>
         </KeyboardAvoidingView>
+        <ChatMenu ref={chatMenuRef}/>
     </SafeAreaView>
     )
 }
