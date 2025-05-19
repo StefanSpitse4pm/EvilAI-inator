@@ -64,7 +64,6 @@ export default function Chatbot() {
 
             
             <TextInput style={styles.mainInput} value={input} onChangeText={setInput} multiline onSubmitEditing={sendMessage} placeholder="Wat is je vraag?" />
-            
             <TouchableOpacity onPress={sendMessage}>
             <MaterialCommunityIcons
               name="send"

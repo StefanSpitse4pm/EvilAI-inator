@@ -1,5 +1,6 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { Text, Button, ScrollView, StyleSheet, View, SafeAreaView, Pressable, TouchableWithoutFeedback, TouchableHighlight} from 'react-native';
+import { Text, ScrollView, StyleSheet, View, SafeAreaView, Pressable, TouchableHighlight, TouchableOpacity} from 'react-native';
+import { MaterialCommunityIcons} from '@expo/vector-icons';
 const ChatMenu = forwardRef(({ onChangeChat }, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const chatMenuHandeler = () => setIsVisible(prev => !prev);
@@ -33,7 +34,16 @@ const ChatMenu = forwardRef(({ onChangeChat }, ref) => {
         isVisible && 
         <SafeAreaView style={styles.container}>
             <ScrollView style={styles.sidebar}>
-            <Text style={{padding: 10}}>Chats</Text>
+            <Text style={{padding: 10}}>
+                Chats
+                <TouchableOpacity style={styles.newIcon}>
+                    <MaterialCommunityIcons
+                    name="plus-box"
+                    size={24}
+                    color='#18aea9'
+                    />
+                </TouchableOpacity>
+            </Text>
             {testData.map(chat => (
                 <View key={chat.id}>
                     <TouchableHighlight onPress={() => { handleChatChange(chat.messages)}}>
@@ -87,7 +97,14 @@ const styles = StyleSheet.create({
         borderBottomColor: 'gray',
         backgroundColor:'#f5f5f5'
 
+    },
+    
+    newIcon: {
+        display: 'flex',
+        alignItems: 'flex-end',
+
     }
+
 
 })
 
