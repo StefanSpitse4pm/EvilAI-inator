@@ -3,6 +3,7 @@ import { View, ScrollView, TextInput, StyleSheet, TouchableOpacity, Text, Keyboa
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ChatMenu, { ChatMenuHandle } from "../components/chatMenus";
+import UniversalHeader from "./components/universalHeader";
 
 export default function Chatbot() {
   const [input, setInput] = useState('');
@@ -50,6 +51,15 @@ export default function Chatbot() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 90}
     >
+      <UniversalHeader
+        title="Chatbot"
+        rightButton={{
+          onPress: handleClick,
+          icon: <MaterialCommunityIcons name="folder-open" size={28} color="#18aea9" />,
+          style: { padding: 8 },
+        }}
+      />
+
       <ScrollView style={styles.messageContainer} contentContainerStyle={{paddingBottom: 16}}>
         {messages.map(message => (
           <MessageWrapper key={message.id} message={message} />
@@ -57,13 +67,7 @@ export default function Chatbot() {
       </ScrollView>
       <View style={styles.inputBarShadow}>
         <View style={styles.inputContainerModern}>
-          <TouchableOpacity onPress={handleClick} style={styles.iconButtonModern}>
-            <MaterialCommunityIcons
-              name="folder-open"
-              size={28}
-              color='#18aea9'
-            />
-          </TouchableOpacity>
+          {/* Removed the folder icon button from here */}
           <View style={styles.inputBoxModern}>
             <TextInput
               style={styles.mainInputModern}
@@ -122,13 +126,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: '#f7f8fa',
   },
-  iconButtonModern: {
-    marginRight: 8,
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#e9ecef',
-    alignSelf: 'flex-end',
-  },
+  // iconButtonModern: removed from usage
   inputBoxModern: {
     flex: 1,
     flexDirection: 'row',
