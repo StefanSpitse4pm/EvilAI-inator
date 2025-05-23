@@ -1,127 +1,148 @@
-import React, {useRef, useState} from "react";
-import { View, ScrollView, TextInput, StyleSheet, TouchableOpacity, Text, KeyboardAvoidingView } from "react-native";
+import React, { useRef, useState } from "react";
+import {
+  View,
+  ScrollView,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  KeyboardAvoidingView,
+  Animated,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialCommunityIcons} from '@expo/vector-icons';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ChatMenu, { ChatMenuHandle } from "../components/chatMenus";
+
 export default function Chatbot() {
-    const [input, setInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [messages, setMessages] = useState([
-        {id: 1,text:'dit is een test', isAI:true}
-    ])
-    const chatMenuRef = useRef<ChatMenuHandle|null>(null);
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState([
+    { id: 1, text: 'dit is een test', isAI: true }
+  ]);
 
-    const sendMessage = async () => {
-       const userMessage = {
-           id: messages.length + 1, 
-           isAI: false,
-           text: input.trim(),
-       }
-       setMessages(prev => [...prev, userMessage])
-       setInput('');
-    }
+  const chatMenuRef = useRef<ChatMenuHandle | null>(null);
+  const heightAnim = useRef(new Animated.Value(60)).current;
 
-    const newChat = (chat: []) => {
-        setMessages(chat)
-    }
+  const focusInputHandler = () => {
+    Animated.timing(heightAnim, {
+      toValue: 120,
+      duration: 150,
+      useNativeDriver: false
+    }).start(); // Start the animation!
+  };
 
-    const MessageWrapper = ({ message }) => {
-        return (
-            <View style= {[styles.messageContent, message.isAI ? styles.aiMessage : styles.userMessage]}>
-                <Text>{ message.text }</Text>
-            </View>
-        )
-    }
+  const sendMessage = async () => {
+    if (input.trim() === '') return;
 
-
-        const handleClick = () => {
-        if (chatMenuRef.current) {
-            chatMenuRef.current?.toggleChatMenu(); // Call method on the ref
-        }
+    const userMessage = {
+      id: messages.length + 1,
+      isAI: false,
+      text: input.trim(),
     };
 
-    return (
-    <SafeAreaView style={styles.container}>
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+  };
 
-        <ScrollView style={styles.messageContainer}>        
-            {messages.map(message => (
+  const newChat = (chat: []) => {
+    setMessages(chat);
+  };
+
+  const MessageWrapper = ({ message }) => {
+    return (
+      <View style={[
+        styles.messageContent,
+        message.isAI ? styles.aiMessage : styles.userMessage
+      ]}>
+        <Text>{message.text}</Text>
+      </View>
+    );
+  };
+
+  const handleClick = () => {
+    chatMenuRef.current?.toggleChatMenu();
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.messageContainer}>
+        {messages.map(message => (
           <MessageWrapper key={message.id} message={message} />
         ))}
-        </ScrollView>
+      </ScrollView>
 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <Animated.View style={[styles.inputContainer, { height: heightAnim }]}>
+          <TouchableOpacity onPress={handleClick}>
+            <MaterialCommunityIcons
+              name="folder-open"
+              size={24}
+              color="#18aea9"
+            />
+          </TouchableOpacity>
 
-        <KeyboardAvoidingView style={styles.inputContainer}>
+          <TextInput
+            style={styles.mainInput}
+            value={input}
+            onChangeText={setInput}
+            multiline
+            onSubmitEditing={sendMessage}
+            placeholder="Wat is je vraag?"
+            onFocus={focusInputHandler}
+          />
 
-            <TouchableOpacity
-            onPress={handleClick}
-            >  
-                <MaterialCommunityIcons
-                name="folder-open"
-                size={24}
-                color='#18aea9'
-                />
-            </TouchableOpacity>
-
-            
-            <TextInput style={styles.mainInput} value={input} onChangeText={setInput} multiline onSubmitEditing={sendMessage} placeholder="Wat is je vraag?" />
-            <TouchableOpacity onPress={sendMessage}>
+          <TouchableOpacity onPress={sendMessage}>
             <MaterialCommunityIcons
               name="send"
               size={24}
-              color='#18aea9'
+              color="#18aea9"
             />
-            </TouchableOpacity>
-        </KeyboardAvoidingView>
-        <ChatMenu ref={chatMenuRef} onChangeChat={newChat}/>
+          </TouchableOpacity>
+        </Animated.View>
+      </KeyboardAvoidingView>
+
+      <ChatMenu ref={chatMenuRef} onChangeChat={newChat} />
     </SafeAreaView>
-    )
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-
-    messageContainer: {
-        display: 'flex',
-        backgroundColor: '#f5f5f5',
-        padding: 16,
-    },
-    inputContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    mainInput: {
-        
-        backgroundColor: 'white',
-        borderColor: 'black',
-        borderWidth: 1,
-        borderRadius: 12,
-        margin: 12,
-        width: '80%',
-        maxHeight: 100,
-    },
-    sendButtton: {
-        width: 44, 
-        height: 44,
-    },
-    userMessage: {
-        alignSelf: 'flex-end'
-    },
-    aiMessage: {
-        alignSelf: 'flex-start'
-    },
-    messageContent: {
-        backgroundColor:'white',
-        padding: 12,
-        borderWidth: 1,
-        borderRadius: 8,
-        borderColor: 'gray',
-        maxWidth: '50%',
-        marginBottom: 20,
-    }
-
-})
-
+  container: {
+    flex: 1,
+  },
+  messageContainer: {
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    paddingHorizontal: 8,
+    borderTopWidth: 1,
+    borderColor: '#ddd',
+  },
+  mainInput: {
+    backgroundColor: 'white',
+    margin: 12,
+    flex: 1,
+    maxHeight: 100,
+  },
+  userMessage: {
+    alignSelf: 'flex-end',
+  },
+  aiMessage: {
+    alignSelf: 'flex-start',
+  },
+  messageContent: {
+    backgroundColor: 'white',
+    padding: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: 'gray',
+    maxWidth: '70%',
+    marginBottom: 20,
+  },
+});
