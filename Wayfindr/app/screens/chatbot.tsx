@@ -1,45 +1,23 @@
-import React, { useRef, useState } from "react";
-import {
-  View,
-  ScrollView,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  KeyboardAvoidingView,
-  Animated,
-  Platform,
-} from "react-native";
+import React, {useRef, useState} from "react";
+import { View, ScrollView, TextInput, StyleSheet, TouchableOpacity, Text, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ChatMenu, { ChatMenuHandle } from "../components/chatMenus";
 
 export default function Chatbot() {
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, text: 'dit is een test', isAI: true }
+    {id: 1, text: 'dit is een test', isAI: true}
   ]);
-
   const chatMenuRef = useRef<ChatMenuHandle | null>(null);
-  const heightAnim = useRef(new Animated.Value(60)).current;
-
-  const focusInputHandler = () => {
-    Animated.timing(heightAnim, {
-      toValue: 120,
-      duration: 150,
-      useNativeDriver: false
-    }).start(); // Start the animation!
-  };
 
   const sendMessage = async () => {
-    if (input.trim() === '') return;
-
     const userMessage = {
       id: messages.length + 1,
       isAI: false,
       text: input.trim(),
     };
-
     setMessages(prev => [...prev, userMessage]);
     setInput('');
   };
@@ -52,83 +30,144 @@ export default function Chatbot() {
     return (
       <View style={[
         styles.messageContent,
-        message.isAI ? styles.aiMessage : styles.userMessage
+        message.isAI ? styles.aiMessage : styles.userMessage,
+        message.isAI ? styles.aiBubble : styles.userBubble
       ]}>
-        <Text>{message.text}</Text>
+        <Text style={message.isAI ? styles.aiText : styles.userText}>{message.text}</Text>
       </View>
     );
   };
 
   const handleClick = () => {
-    chatMenuRef.current?.toggleChatMenu();
+    if (chatMenuRef.current) {
+      chatMenuRef.current?.toggleChatMenu();
+    }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.messageContainer}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 90}
+    >
+      <ScrollView style={styles.messageContainer} contentContainerStyle={{paddingBottom: 16}}>
         {messages.map(message => (
           <MessageWrapper key={message.id} message={message} />
         ))}
       </ScrollView>
-
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <Animated.View style={[styles.inputContainer, { height: heightAnim }]}>
-          <TouchableOpacity onPress={handleClick}>
+      <View style={styles.inputBarShadow}>
+        <View style={styles.inputContainerModern}>
+          <TouchableOpacity onPress={handleClick} style={styles.iconButtonModern}>
             <MaterialCommunityIcons
               name="folder-open"
-              size={24}
-              color="#18aea9"
+              size={28}
+              color='#18aea9'
             />
           </TouchableOpacity>
-
-          <TextInput
-            style={styles.mainInput}
-            value={input}
-            onChangeText={setInput}
-            multiline
-            onSubmitEditing={sendMessage}
-            placeholder="Wat is je vraag?"
-            onFocus={focusInputHandler}
-          />
-
-          <TouchableOpacity onPress={sendMessage}>
-            <MaterialCommunityIcons
-              name="send"
-              size={24}
-              color="#18aea9"
+          <View style={styles.inputBoxModern}>
+            <TextInput
+              style={styles.mainInputModern}
+              value={input}
+              onChangeText={setInput}
+              multiline
+              placeholder="Stel een vraag..."
+              placeholderTextColor="#888"
+              underlineColorAndroid="transparent"
             />
-          </TouchableOpacity>
-        </Animated.View>
-      </KeyboardAvoidingView>
-
+            <TouchableOpacity
+              onPress={sendMessage}
+              style={[
+                styles.sendButtonModern,
+                input.trim() ? styles.sendButtonActive : styles.sendButtonDisabled
+              ]}
+              disabled={!input.trim()}
+            >
+              <MaterialCommunityIcons
+                name="send"
+                size={22}
+                color={input.trim() ? '#fff' : '#b0b0b0'}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
       <ChatMenu ref={chatMenuRef} onChangeChat={newChat} />
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f7f8fa',
   },
   messageContainer: {
-    backgroundColor: '#f5f5f5',
-    padding: 16,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    paddingHorizontal: 8,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
-  },
-  mainInput: {
-    backgroundColor: 'white',
-    margin: 12,
     flex: 1,
+    backgroundColor: '#f7f8fa',
+    paddingHorizontal: 8,
+    paddingTop: 16,
+  },
+  inputBarShadow: {
+    backgroundColor: '#f7f8fa',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  inputContainerModern: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    backgroundColor: '#f7f8fa',
+  },
+  iconButtonModern: {
+    marginRight: 8,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#e9ecef',
+    alignSelf: 'flex-end',
+  },
+  inputBoxModern: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  mainInputModern: {
+    flex: 1,
+    fontSize: 16,
+    color: '#222',
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+    paddingHorizontal: 0,
+    minHeight: 36,
     maxHeight: 100,
+  },
+  sendButtonModern: {
+    marginLeft: 8,
+    borderRadius: 20,
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e0e0e0',
+  },
+  sendButtonActive: {
+    backgroundColor: '#18aea9',
+  },
+  sendButtonDisabled: {
+    backgroundColor: '#e0e0e0',
   },
   userMessage: {
     alignSelf: 'flex-end',
@@ -136,13 +175,40 @@ const styles = StyleSheet.create({
   aiMessage: {
     alignSelf: 'flex-start',
   },
-  messageContent: {
-    backgroundColor: 'white',
-    padding: 12,
+  userBubble: {
+    backgroundColor: '#18aea9',
+    borderTopRightRadius: 0,
+    borderTopLeftRadius: 16,
+    borderBottomRightRadius: 8,
+    borderBottomLeftRadius: 16,
+    borderColor: '#18aea9',
+    marginBottom: 12,
+    maxWidth: '80%',
+  },
+  aiBubble: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 16,
+    borderColor: '#e0e0e0',
+    marginBottom: 12,
+    maxWidth: '80%',
     borderWidth: 1,
-    borderRadius: 8,
-    borderColor: 'gray',
-    maxWidth: '70%',
-    marginBottom: 20,
+  },
+  userText: {
+    color: '#fff',
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  aiText: {
+    color: '#222',
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  messageContent: {
+    padding: 14,
+    borderWidth: 0,
+    marginBottom: 0,
   },
 });
