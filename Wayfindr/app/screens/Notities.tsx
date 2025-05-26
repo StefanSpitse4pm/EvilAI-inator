@@ -135,7 +135,7 @@ export default function Notities() {
             <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0} // adjust 100 if needed
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
@@ -145,7 +145,7 @@ export default function Notities() {
             <Animated.View
               entering={FadeInUp}
               exiting={FadeOutDown}
-              style={[styles.createNoteContainer, { marginBottom: 40 }]} // optional space at the bottom
+              style={[styles.createNoteContainer, { marginBottom: 40 }]} 
             >
               <TextInput
                 style={styles.titleInput}

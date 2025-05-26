@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Animated, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useEffect } from 'react';
 
@@ -43,29 +43,22 @@ export default function SlideMenu({ isVisible, onClose }: SlideMenuProps) {
 
   type FontAwesomeIconName = React.ComponentProps<typeof FontAwesome>['name'];
 
-  const menuItems: { icon: FontAwesomeIconName; label: string; onPress: () => void }[] = [
-    { icon: 'user', label: 'Account', onPress: () => console.log('Account pressed') },
-    { icon: 'cog', label: 'Settings', onPress: () => console.log('Settings pressed') },
-    { icon: 'sign-out', label: 'Logout', onPress: () => console.log('Logout pressed') },
+  const menuItems = [
+    { icon: 'user' as FontAwesomeIconName, label: 'Account', onPress: () => console.log('Account pressed') },
+    { icon: 'cog' as FontAwesomeIconName, label: 'Settings', onPress: () => console.log('Settings pressed') },
   ];
+
+  const logoutItem = { icon: 'sign-out' as FontAwesomeIconName, label: 'Logout', onPress: () => console.log('Logout pressed') };
 
   if (!isVisible) return null;
 
   return (
     <View style={styles.container}>
       <Animated.View 
-        style={[
-          styles.overlay,
-          { opacity: fadeAnim }
-        ]}
+        style={[styles.overlay, { opacity: fadeAnim }]}
         onTouchStart={onClose}
       />
-      <Animated.View 
-        style={[
-          styles.menu,
-          { transform: [{ translateX: slideAnim }] }
-        ]}
-      >
+      <Animated.View style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}>
         <View style={styles.header}>
           <Text style={styles.headerText}>More</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -83,6 +76,13 @@ export default function SlideMenu({ isVisible, onClose }: SlideMenuProps) {
               <Text style={styles.menuText}>{item.label}</Text>
             </TouchableOpacity>
           ))}
+        </View>
+        {}
+        <View style={styles.logoutContainer}>
+          <TouchableOpacity style={[styles.menuItem, styles.logoutButton]} onPress={logoutItem.onPress}>
+            <FontAwesome name={logoutItem.icon} size={20} color="red" style={styles.menuIcon} />
+            <Text style={[styles.menuText, { color: 'red' }]}>{logoutItem.label}</Text>
+          </TouchableOpacity>
         </View>
       </Animated.View>
     </View>
@@ -120,6 +120,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+
+    // Make flex container to push logout to bottom
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
   },
   header: {
     flexDirection: 'row',
@@ -134,10 +138,11 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 8,
-  },  menuItems: {
+  },
+  menuItems: {
     paddingHorizontal: 15,
-    marginTop: 10,
-  },  menuItem: {
+  },
+  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
@@ -158,5 +163,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#333',
     fontWeight: '500',
+  },
+  logoutContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 15,
+    paddingBottom: 20,
+  },
+  logoutButton: {
+    backgroundColor: 'white',
   },
 });
