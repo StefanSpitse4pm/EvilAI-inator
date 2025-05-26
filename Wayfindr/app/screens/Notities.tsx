@@ -7,6 +7,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -129,40 +132,57 @@ export default function Notities() {
       </View>
 
       {isCreating ? (
-        <Animated.View entering={FadeInUp} exiting={FadeOutDown} style={styles.createNoteContainer}>
-          <TextInput
-            style={styles.titleInput}
-            placeholder="Note Title"
-            value={title}
-            onChangeText={setTitle}
-            maxLength={50}
-          />
-          <TextInput
-            style={styles.contentInput}
-            placeholder="Write your note here..."
-            value={content}
-            onChangeText={setContent}
-            multiline
-            textAlignVertical="top"
-          />
-          <View style={styles.colorPickerContainer}>
-            {colorOptions.map((c) => (
-              <TouchableOpacity
-                key={c}
-                style={[styles.colorOption, { backgroundColor: c }, c === color && styles.selectedColor]}
-                onPress={() => setColor(c)}
+            <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0} // adjust 100 if needed
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Animated.View
+              entering={FadeInUp}
+              exiting={FadeOutDown}
+              style={[styles.createNoteContainer, { marginBottom: 40 }]} // optional space at the bottom
+            >
+              <TextInput
+                style={styles.titleInput}
+                placeholder="Note Title"
+                value={title}
+                onChangeText={setTitle}
+                maxLength={50}
               />
-            ))}
-          </View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={resetForm}>
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={saveNote}>
-              <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
+              <TextInput
+                style={styles.contentInput}
+                placeholder="Write your note here..."
+                value={content}
+                onChangeText={setContent}
+                multiline
+                textAlignVertical="top"
+              />
+              <View style={styles.colorPickerContainer}>
+                {colorOptions.map((c) => (
+                  <TouchableOpacity
+                    key={c}
+                    style={[styles.colorOption, { backgroundColor: c }, c === color && styles.selectedColor]}
+                    onPress={() => setColor(c)}
+                  />
+                ))}
+              </View>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={resetForm}>
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={saveNote}>
+                  <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
       ) : (
         <ScrollView style={styles.notesList}>
           {notes.length === 0 ? (
