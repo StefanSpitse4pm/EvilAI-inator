@@ -1,10 +1,12 @@
+import { AppRegistry } from 'react-native';
+import App from '../app';
 import * as React from 'react';
-import { Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Homescreen from './screens/homescreen'
 import Chatbot from './screens/chatbot'
 import Map from './screens/map'
+import { Redirect } from "expo-router";
 
 const Tab = createBottomTabNavigator()
 
