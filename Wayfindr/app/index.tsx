@@ -1,50 +1,64 @@
-import * as React from 'react';
-import { StyleSheet } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { Ionicons } from '@expo/vector-icons';
 import Homescreen from './screens/homescreen';
 import Chatbot from './screens/chatbot';
-import Notities from './screens/Notities';
-import SlideMenu from './screens/sidemenu';
+import Notities from "./screens/Notities";
+import { Image } from 'react-native';
 
 const Tab = createBottomTabNavigator();
-const Drawer = createDrawerNavigator();
 
-function Tabs() {
+export default function Index() {
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Tab.Screen name="Home" component={Homescreen} />
-      <Tab.Screen name="AI" component={Chatbot} />
-      <Tab.Screen name="Notities" component={Notities} />
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen
+        name="Home"
+        component={Homescreen}
+        options={{
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Map"
+        component={Homescreen}
+        options={{
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Ionicons name="map" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="AI"
+        component={Chatbot}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require('../assets/images/aipic.png')}
+              style={{ width: size + 8, height: size + 8 }}
+              resizeMode="contain"
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Agenda"
+        component={Homescreen}
+        options={{
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Ionicons name="calendar" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Notities"
+        component={Notities}
+        options={{
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Ionicons name="document-text" size={size} color={color} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
-
-export default function App() {
-  return (
-      <Drawer.Navigator
-        drawerContent={props => (
-          <SlideMenu
-            {...props}
-            isVisible={true}
-            onClose={() => props.navigation.closeDrawer()}
-          />
-        )}
-        screenOptions={{ headerShown: false }}
-      >
-        <Drawer.Screen name="Tabs" component={Tabs} />
-      </Drawer.Navigator>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    userSelect: "none"
-  }
-});
