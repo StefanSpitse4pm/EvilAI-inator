@@ -1,5 +1,5 @@
 from starlette.requests import Request
-from logging import get_logger
+from log import get_logger
 
 async def log_middleware(request: Request, call_next):
     logger = get_logger()

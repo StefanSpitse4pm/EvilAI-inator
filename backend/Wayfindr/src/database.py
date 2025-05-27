@@ -1,9 +1,9 @@
 from typing import Any, AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncConnection
 from sqlalchemy import  (Insert, Select, Update)
-from .config import settings
+from config import settings
 
-engine = create_async_engine(settings.MYSQL_URI)
+engine = create_async_engine(settings.MYSQL_DATABASE_URI)
 
 async def fetch_one(query: Insert | Select | Update, connection: AsyncConnection | None = None, commit: bool = False) -> dict[str, Any]:
     if connection is None:

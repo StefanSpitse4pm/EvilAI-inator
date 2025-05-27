@@ -5,7 +5,7 @@ class Base(DeclarativeBase):
     pass
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "User"
 
     userId: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     Voornaam: Mapped[str] = mapped_column(VARCHAR(255), unique=True, nullable=False)
