@@ -8,8 +8,8 @@ class User(Base):
     __tablename__ = "User"
 
     userId: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    Voornaam: Mapped[str] = mapped_column(VARCHAR(255), unique=True, nullable=False)
-    Achternaam: Mapped[str] = mapped_column(VARCHAR(255), unique=True, nullable=False)
+    Voornaam: Mapped[str] = mapped_column(VARCHAR(255), nullable=False)
+    Achternaam: Mapped[str] = mapped_column(VARCHAR(255), nullable=False)
     Wachtwoord: Mapped[str] = mapped_column(VARCHAR(128), nullable=False)
     Email: Mapped[str] = mapped_column(VARCHAR(255), unique=True, nullable=False)
     Description: Mapped[str] = mapped_column(TEXT, nullable=True)
