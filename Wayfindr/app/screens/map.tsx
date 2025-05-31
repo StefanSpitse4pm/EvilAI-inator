@@ -274,4 +274,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: 'center',
   },
+  map: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height - 60,
+  },
 });
