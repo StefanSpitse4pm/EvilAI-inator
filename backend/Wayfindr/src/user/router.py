@@ -3,7 +3,11 @@ from starlette.responses import Response
 from database import fetch_one, execute
 from sqlalchemy import select
 from user.models import User
-from user.schemas import UserBase, UserCreate, UserRead
+from user.schemas import UserBase, UserCreate, UserRead, UserLogin
+from user.service import get_password_hash, verify_password, create_access_token
+from fastapi.security import OAuth2PasswordBearer
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 router = APIRouter()
 @router.get("/user/{user_id}")
@@ -33,11 +37,12 @@ async def post_user(user: UserCreate):
         PFP=user.PFP,
         Phone=user.Phone
     )
+
     await execute(
         User.__table__.insert().values(
             Voornaam=new_user.Voornaam,
             Achternaam=new_user.Achternaam,
-            Wachtwoord=new_user.Wachtwoord,
+            Wachtwoord=get_password_hash(new_user.Wachtwoord),
             Email=new_user.Email,
             Description=new_user.Description,
             PFP=new_user.PFP,
@@ -45,9 +50,11 @@ async def post_user(user: UserCreate):
         ),
         commit=True
     )
+
     new_user = await fetch_one(select(User).where(User.Email == user.Email))
     if not new_user:
         return Response(status_code=500, content="Failed to create user")
+    
     return UserRead(
         userId=new_user['userId'],
         Voornaam=new_user['Voornaam'],
@@ -55,9 +62,19 @@ async def post_user(user: UserCreate):
         Email=new_user['Email'],
     )
 
-@router.post("/login", response_model=UserRead)
-async def post_user():
-    pass
+@router.post("/login")
+async def login(user: UserLogin):
+    """
+    Login user
+    """
+    db_user = await fetch_one(
+        select(User).where(User.Email == user.Email))
+
+    if not db_user or not verify_password(user.Wachtwoord, db_user['Wachtwoord']):
+        return Response(status_code=401, content="Invalid credentials")
+    
+    access_token = create_access_token(data={"sub": db_user['Email']}) 
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.delete("/user/{user_id}", status_code=204)

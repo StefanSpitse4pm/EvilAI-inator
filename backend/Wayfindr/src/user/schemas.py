@@ -13,3 +13,7 @@ class UserRead(UserBase):
 
 class UserCreate(UserBase):
     Wachtwoord: str
+
+class UserLogin(BaseModel):
+    Email: EmailStr
+    Wachtwoord: str
