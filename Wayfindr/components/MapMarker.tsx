@@ -1,13 +1,13 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useSharedValue, SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { SchoolLocation } from '../data/schooldata';
 
 interface MapMarkerProps {
   location: SchoolLocation;
   onPress: () => void;
-  scale: any;
+  scale: SharedValue<number>;
 }
 
 export default function MapMarker({ location, onPress, scale }: MapMarkerProps) {

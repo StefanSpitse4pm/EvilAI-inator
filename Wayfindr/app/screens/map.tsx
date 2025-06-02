@@ -1,35 +1,35 @@
 import React, { useState, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  Dimensions, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
   ScrollView,
   Image,
-  Modal,
-  SafeAreaView
 } from 'react-native';
 import {
-  GestureHandlerGestureEvent,
+  PinchGestureHandler,
+  PanGestureHandler,
   PinchGestureHandlerGestureEvent,
   PanGestureHandlerGestureEvent,
-  PanGestureHandler,
-  GestureHandlerRootView,
-  PinchGestureHandler,
-  State
 } from 'react-native-gesture-handler';
-import Animated, { 
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated,
+{
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
+  SharedValue,
+  runOnJS,
+  withTiming,
   withSpring,
-  runOnJS
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import MapMarker from '../../components/MapMarker';
 import LocationModal from '../../components/LocationModal';
 import { schoolLocations, SchoolLocation } from '../../data/schooldata';
+import { useNavigation } from '@react-navigation/native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -37,24 +37,30 @@ export default function HomeScreen() {
   const [selectedLocation, setSelectedLocation] = useState<SchoolLocation | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   
+  const navigation = useNavigation();
+
   // Animation values
-  const scale = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const offsetX = useSharedValue(0);
-  const offsetY = useSharedValue(0);
+  const initialScale = 1;
+const initialTranslateX = 0;
+const initialTranslateY = 0;
+
+const scale = useSharedValue(initialScale);
+const translateX = useSharedValue(initialTranslateX);
+const translateY = useSharedValue(initialTranslateY);
+const offsetX = useSharedValue(initialTranslateX);
+const offsetY = useSharedValue(initialTranslateY);
 
   // Refs
-  const panRef = useRef(1);
-  const pinchRef = useRef(1);
+  const panRef = useRef(null);
+  const pinchRef = useRef(null);
 
   // Gesture handlers
   const pinchHandler = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent>({
-    onStart: (event) => {
-      offsetX.value = translateX.value;
-      offsetY.value = translateY.value;
+    onStart: (_, ctx: any) => {
+      ctx.offsetX = translateX.value;
+      ctx.offsetY = translateY.value;
     },
-    onActive: (event) => {
+    onActive: (event, ctx: any) => {
       scale.value = event.scale;
     },
     onEnd: () => {
@@ -70,32 +76,29 @@ export default function HomeScreen() {
     },
   });
 
+
   const panHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
-    onStart: () => {
-      // Store initial values
+    onStart: (_, ctx: any) => {
+      ctx.startX = translateX.value;
+      ctx.startY = translateY.value;
     },
-    onActive: (event) => {
-      translateX.value = event.translationX;
-      translateY.value = event.translationY;
+    onActive: (event, ctx: any) => {
+      translateX.value = ctx.startX + event.translationX;
+      translateY.value = ctx.startY + event.translationY;
     },
     onEnd: () => {
-      // Add boundary constraints
       const maxTranslateX = (screenWidth * (scale.value - 1)) / 2;
       const maxTranslateY = (screenHeight * (scale.value - 1)) / 2;
-      
-      if (translateX.value > maxTranslateX) {
-        translateX.value = withSpring(maxTranslateX);
-      } else if (translateX.value < -maxTranslateX) {
-        translateX.value = withSpring(-maxTranslateX);
-      }
-      
-      if (translateY.value > maxTranslateY) {
-        translateY.value = withSpring(maxTranslateY);
-      } else if (translateY.value < -maxTranslateY) {
-        translateY.value = withSpring(-maxTranslateY);
-      }
+
+      translateX.value = withSpring(
+        Math.max(-maxTranslateX, Math.min(translateX.value, maxTranslateX))
+      );
+      translateY.value = withSpring(
+        Math.max(-maxTranslateY, Math.min(translateY.value, maxTranslateY))
+      );
     },
-  });
+});
+
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -116,16 +119,20 @@ export default function HomeScreen() {
     const targetScale = 2;
     const targetX = -((location.x - screenWidth / 2) * targetScale);
     const targetY = -((location.y - screenHeight / 2) * targetScale);
-    
+
     scale.value = withSpring(targetScale);
     translateX.value = withSpring(targetX);
     translateY.value = withSpring(targetY);
+    offsetX.value = targetX;
+    offsetY.value = targetY;
   };
 
   const resetZoom = () => {
     scale.value = withSpring(1);
     translateX.value = withSpring(0);
     translateY.value = withSpring(0);
+    offsetX.value = 0;
+    offsetY.value = 0;
   };
 
   return (
@@ -150,22 +157,20 @@ export default function HomeScreen() {
               simultaneousHandlers={pinchRef}
             >
               <Animated.View style={[styles.mapView, animatedStyle]}>
-                {/* School Map Background */}
-                <View style={styles.mapBackground}>
-                  <Image 
-                    source={require('../../assets/images/nhl-stenden-1.png')}
-                    style={styles.backgroundImage}
-                    resizeMode="cover"
-                  />
-                </View>
+                {/* Background image als achtergrond */}
+                <Image
+                  source={require('../../assets/images/nhl-stenden-1.png')}
+                  style={StyleSheet.absoluteFill}
+                  resizeMode="contain"
+                />
 
-                {/* Map Markers */}
+                {/* Markers */}
                 {schoolLocations.map((location) => (
                   <MapMarker
                     key={location.id}
                     location={location}
                     onPress={() => handleMarkerPress(location)}
-                    scale={scale}
+                    scale={scale as SharedValue<number>}
                   />
                 ))}
               </Animated.View>
@@ -174,7 +179,6 @@ export default function HomeScreen() {
         </PinchGestureHandler>
       </View>
 
-      {/* Quick Access Buttons */}
       <View style={styles.quickAccess}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {schoolLocations.map((location) => (
@@ -190,7 +194,6 @@ export default function HomeScreen() {
         </ScrollView>
       </View>
 
-      {/* Location Modal */}
       <LocationModal
         location={selectedLocation}
         visible={modalVisible}
@@ -209,7 +212,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#000', // <-- zwart
   },
   header: {
     flexDirection: 'row',
@@ -231,7 +234,7 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     flex: 1,
-    backgroundColor: '#e2e8f0',
+    backgroundColor: '#000', // <-- zwart
   },
   mapView: {
     width: screenWidth,
@@ -247,9 +250,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backgroundImage: {
-    width: screenWidth * 0.9,
-    height: screenWidth * 0.9,
-    borderRadius: 20,
+    width: screenWidth,
+    height: screenWidth,
+    borderRadius: 0,
   },
   quickAccess: {
     paddingHorizontal: 20,
@@ -273,9 +276,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 4,
     textAlign: 'center',
-  },
-  map: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height - 60,
   },
 });
