@@ -12,6 +12,14 @@ const categoryColors = {
   'Assessment': '#FE5858',
 };
 
+const categorieUitleg = {
+  'Les': 'Een reguliere les of college.',
+  'Kick-off': 'De start van een project of periode.',
+  'Toets': 'Een toetsmoment of examen.',
+  'Activiteit': 'Een extra activiteit, zoals een uitje.',
+  'Assessment': 'Een beoordeling of presentatie.',
+};
+
 const initialAfspraken = [
   { id: 1, title: 'Informatica', time: '10:00 AM', date: '2025-05-28', category: 'Les', location: '' },
   { id: 2, title: 'Project', time: '11:00 AM', date: '2025-05-29', category: 'Kick-off', location: '' },
@@ -253,7 +261,10 @@ export default function Agenda() {
               value={dateInput}
               onChangeText={setDateInput}
             />
-            <Text style={{ marginTop: 10, marginBottom: 5 }}>Categorie:</Text>
+            <Text style={{ marginTop: 10, marginBottom: 5, fontWeight: 'bold' }}>Categorie:</Text>
+            <Text style={{ color: '#888', marginBottom: 8, fontSize: 13 }}>
+              {categorieUitleg[selectedAfspraak?.category || categorieOpties[0]]}
+            </Text>
             <View style={styles.colorPickerContainer}>
               {categorieOpties.map(opt => (
                 <TouchableOpacity
