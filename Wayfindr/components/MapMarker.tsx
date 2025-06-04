@@ -1,30 +1,34 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { useSharedValue, SharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { SchoolLocation } from '../data/schooldata';
 
 interface MapMarkerProps {
   location: SchoolLocation;
   onPress: () => void;
-  scale: SharedValue<number>;
+  imgScale: number;
+  offsetX: number;
+  offsetY: number;
 }
 
-export default function MapMarker({ location, onPress, scale }: MapMarkerProps) {
-  const markerStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { scale: 1 / scale.value }, // Counter scale to maintain size
-      ],
-    };
-  });
+export default function MapMarker({ location, onPress, imgScale, offsetX, offsetY }: MapMarkerProps) {
+  const markerStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: 0.1 / imgScale },
+    ],
+  }));
 
   return (
-    <Animated.View 
+    <Animated.View
       style={[
         styles.markerContainer,
-        { left: location.x - 25, top: location.y - 25 },
-        markerStyle
+        {
+          position: 'absolute',
+          left: location.x * imgScale + offsetX,
+          top: location.y * imgScale + offsetY,
+        },
+        markerStyle,
       ]}
     >
       <TouchableOpacity onPress={onPress} style={styles.marker}>

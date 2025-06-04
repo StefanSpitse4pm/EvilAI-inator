@@ -1,4 +1,7 @@
 import React, { useRef } from 'react';
+import MapMarker from '../../components/MapMarker';
+import { SchoolLocation, schoolLocations } from '../../data/schooldata';
+import LocationModal from '../../components/LocationModal';
 import {
   View,
   Image,
@@ -16,7 +19,8 @@ import {
   PinchGestureHandlerGestureEvent,
   PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
-import Animated, {
+import Animated,
+{
   useAnimatedGestureHandler,
   useSharedValue,
   useAnimatedStyle,
@@ -52,10 +56,20 @@ const getPanLimits = (scale: number) => {
   };
 };
 
+function getImageLayout() {
+  const scale = Math.min(screenWidth / imageWidth, screenHeight / imageHeight);
+  const displayWidth = imageWidth * scale;
+  const displayHeight = imageHeight * scale;
+  const offsetX = (screenWidth - displayWidth) / 2;
+  const offsetY = (screenHeight - displayHeight) / 2;
+  return { scale, offsetX, offsetY };
+}
+
 const HomeScreen = () => {
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
+  const [selectedLocation, setSelectedLocation] = React.useState<SchoolLocation | null>(null);
 
   const panHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, { startX: number; startY: number }>({
     onStart: (_, ctx: any) => {
@@ -96,15 +110,21 @@ const HomeScreen = () => {
     ],
   }));
 
+  const handleMarkerPress = (location: SchoolLocation) => {
+    setSelectedLocation(location);
+  };
+
+  const { scale: imgScale, offsetX, offsetY } = getImageLayout();
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PinchGestureHandler onGestureEvent={pinchHandler}>
         <Animated.View style={{ flex: 1 }}>
           <PanGestureHandler onGestureEvent={panHandler}>
             <Animated.View style={{ flex: 1 }}>
-            <View style={styles.header}>
-              <Text style={styles.headerTitle}>NHL Stenden - Map</Text>
-            </View>
+              <View style={styles.header}>
+                <Text style={styles.headerTitle}>NHL Stenden - Map</Text>
+              </View>
               <Animated.Image
                 source={require('../../assets/images/nhl-stenden-1.png')}
                 style={[
@@ -117,10 +137,27 @@ const HomeScreen = () => {
                 ]}
                 resizeMode="contain"
               />
+              {/* Markers */}
+              {schoolLocations.map((location) => (
+                <MapMarker
+                  key={location.id}
+                  location={location}
+                  onPress={() => handleMarkerPress(location)}
+                  imgScale={imgScale}
+                  offsetX={offsetX}
+                  offsetY={offsetY}
+                />
+              ))}
             </Animated.View>
           </PanGestureHandler>
         </Animated.View>
       </PinchGestureHandler>
+      <LocationModal
+        location={selectedLocation}
+        visible={!!selectedLocation}
+        onClose={() => setSelectedLocation(null)}
+        onZoomTo={() => {/* optioneel: zoom naar marker */}}
+      />
     </GestureHandlerRootView>
   );
 };
