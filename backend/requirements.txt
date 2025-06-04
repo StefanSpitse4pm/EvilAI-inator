@@ -1,0 +1,9 @@
+fastapi
+sqlalchemy
+pydantic
+pandas
+uvicorn
+slowapi
+limits
+starlette
+asyncmy
