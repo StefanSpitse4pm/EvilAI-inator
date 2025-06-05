@@ -3,12 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  Modal,
   TouchableOpacity,
   ScrollView,
   Image,
   Dimensions,
 } from 'react-native';
+import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
 import { SchoolLocation } from '../data/schooldata';
 
@@ -26,75 +26,72 @@ export default function LocationModal({ location, visible, onClose, onZoomTo }: 
 
   return (
     <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-      presentationStyle="overFullScreen"
+      isVisible={visible}
+      onBackdropPress={onClose}
+      onBackButtonPress={onClose}
+      style={styles.modal}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <View style={styles.headerLeft}>
-              <View style={[styles.iconContainer, { backgroundColor: location.color }]}>
-                <Ionicons name={location.icon as any} size={24} color="#fff" />
-              </View>
-              <Text style={styles.modalTitle}>{location.name}</Text>
+      <View style={styles.modalContent}>
+        <View style={styles.modalHeader}>
+          <View style={styles.headerLeft}>
+            <View style={[styles.iconContainer, { backgroundColor: location.color }]}>
+              <Ionicons name={location.icon as any} size={24} color="#fff" />
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color="#64748b" />
-            </TouchableOpacity>
+            <Text style={styles.modalTitle}>{location.name}</Text>
           </View>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={24} color="#64748b" />
+          </TouchableOpacity>
+        </View>
 
-          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-            <Image
-              source={require('../assets/images/nhl-stenden-1.png')}
-              style={styles.locationImage}
-              resizeMode="cover"
-            />
-            
-            <View style={styles.infoSection}>
-              <Text style={styles.description}>{location.description}</Text>
-              
-              <View style={styles.detailsContainer}>
-                <View style={styles.detailRow}>
-                  <Ionicons name="time-outline" size={20} color="#6366f1" />
-                  <Text style={styles.detailText}>Hours: {location.hours}</Text>
-                </View>
-                
-                <View style={styles.detailRow}>
-                  <Ionicons name="location-outline" size={20} color="#6366f1" />
-                  <Text style={styles.detailText}>Building: {location.building}</Text>
-                </View>
-                
-                {location.phone && (
-                  <View style={styles.detailRow}>
-                    <Ionicons name="call-outline" size={20} color="#6366f1" />
-                    <Text style={styles.detailText}>{location.phone}</Text>
-                  </View>
-                )}
+        <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+          <Image
+            source={require('../assets/images/nhl-stenden-1.png')}
+            style={styles.locationImage}
+            resizeMode="cover"
+          />
+
+          <View style={styles.infoSection}>
+            <Text style={styles.description}>{location.description}</Text>
+
+            <View style={styles.detailsContainer}>
+              <View style={styles.detailRow}>
+                <Ionicons name="time-outline" size={20} color="#6366f1" />
+                <Text style={styles.detailText}>Hours: {location.hours}</Text>
               </View>
 
-              {location.services && location.services.length > 0 && (
-                <View style={styles.servicesSection}>
-                  <Text style={styles.servicesTitle}>Services Available:</Text>
-                  {location.services.map((service, index) => (
-                    <View key={index} style={styles.serviceItem}>
-                      <Ionicons name="checkmark-circle" size={16} color="#10b981" />
-                      <Text style={styles.serviceText}>{service}</Text>
-                    </View>
-                  ))}
+              <View style={styles.detailRow}>
+                <Ionicons name="location-outline" size={20} color="#6366f1" />
+                <Text style={styles.detailText}>Building: {location.building}</Text>
+              </View>
+
+              {location.phone && (
+                <View style={styles.detailRow}>
+                  <Ionicons name="call-outline" size={20} color="#6366f1" />
+                  <Text style={styles.detailText}>{location.phone}</Text>
                 </View>
               )}
             </View>
-          </ScrollView>
 
-          <View style={styles.modalFooter}>
-            <TouchableOpacity style={styles.zoomButton} onPress={onZoomTo}>
-              <Ionicons name="locate" size={20} color="#fff" />
-              <Text style={styles.zoomButtonText}>Zoom to Location</Text>
-            </TouchableOpacity>
+            {location.services && location.services.length > 0 && (
+              <View style={styles.servicesSection}>
+                <Text style={styles.servicesTitle}>Services Available:</Text>
+                {location.services.map((service, index) => (
+                  <View key={index} style={styles.serviceItem}>
+                    <Ionicons name="checkmark-circle" size={16} color="#10b981" />
+                    <Text style={styles.serviceText}>{service}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
+        </ScrollView>
+
+        <View style={styles.modalFooter}>
+          <TouchableOpacity style={styles.zoomButton} onPress={onZoomTo}>
+            <Ionicons name="locate" size={20} color="#fff" />
+            <Text style={styles.zoomButtonText}>Zoom to Location</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -102,10 +99,9 @@ export default function LocationModal({ location, visible, onClose, onZoomTo }: 
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  modal: {
     justifyContent: 'flex-end',
+    margin: 0,
   },
   modalContent: {
     backgroundColor: '#fff',

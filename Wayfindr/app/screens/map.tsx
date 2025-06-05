@@ -172,9 +172,8 @@ const MapScreen = () => {
               </Animated.View>
             </Animated.View>
           </PinchGestureHandler>
-        </Animated.View> 
+        </Animated.View>
       </PanGestureHandler>
-
       <LocationModal
         location={selectedLocation}
         visible={!!selectedLocation}
@@ -187,7 +186,6 @@ const MapScreen = () => {
 
 const styles = StyleSheet.create({
   header: {
-    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
