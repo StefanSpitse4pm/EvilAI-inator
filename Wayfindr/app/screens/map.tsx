@@ -1,7 +1,4 @@
-import React, { useRef } from 'react';
-import MapMarker from '../../components/MapMarker';
-import { SchoolLocation, schoolLocations } from '../../data/schooldata';
-import LocationModal from '../../components/LocationModal';
+import React, { useState } from 'react';
 import {
   View,
   Image,
@@ -13,25 +10,30 @@ import {
   PanGestureHandler,
   PinchGestureHandler,
   GestureHandlerRootView,
-  GestureEvent,
-  PinchGestureHandlerEventPayload,
-  GestureHandlerGestureEvent,
   PinchGestureHandlerGestureEvent,
   PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
-import Animated,
-{
+import Animated, {
   useAnimatedGestureHandler,
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withDecay,
 } from 'react-native-reanimated';
+import MapMarker from '../../components/MapMarker';
+import LocationModal from '../../components/LocationModal';
+import { SchoolLocation, schoolLocations } from '../../data/schooldata';
 
+// 📱 Schermdimensies
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-// ⬇️ Afmetingen van je kaartafbeelding
+// 🖼️ Afbeelding afmetingen
 const imageWidth = 3938;
 const imageHeight = 2363;
+
+// 🔐 Schaal limieten
+const MIN_SCALE = 0.5; // Iets uitzoomen onder 1
+const MAX_SCALE = 3;
 
 // 🔧 Clamp-helper
 const clamp = (value: number, min: number, max: number) => {
@@ -39,14 +41,14 @@ const clamp = (value: number, min: number, max: number) => {
   return Math.max(min, Math.min(value, max));
 };
 
-// 🔧 Bereken pan-limieten op basis van schaal
+// 🔧 Pan-limieten gebaseerd op zoom
 const getPanLimits = (scale: number) => {
   'worklet';
   const scaledWidth = imageWidth * scale;
   const scaledHeight = imageHeight * scale;
 
-  const offsetX = Math.max((scaledWidth - screenWidth) / 2, 0);
-  const offsetY = Math.max((scaledWidth - screenWidth) / 2, 0);
+  const offsetX = Math.max((scaledWidth - screenWidth) / 1, 0);
+  const offsetY = Math.max((scaledHeight - screenHeight) / 0.5, 0);
 
   return {
     minX: -offsetX,
@@ -56,44 +58,73 @@ const getPanLimits = (scale: number) => {
   };
 };
 
-function getImageLayout() {
-  const scale = Math.min(screenWidth / imageWidth, screenHeight / imageHeight);
-  const displayWidth = imageWidth * scale;
-  const displayHeight = imageHeight * scale;
-  const offsetX = (screenWidth - displayWidth) / 2;
-  const offsetY = (screenHeight - displayHeight) / 2;
-  return { scale, offsetX, offsetY };
-}
-
-const HomeScreen = () => {
+const MapScreen = () => {
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const [selectedLocation, setSelectedLocation] = React.useState<SchoolLocation | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<SchoolLocation | null>(null);
 
-  const panHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, { startX: number; startY: number }>({
-    onStart: (_, ctx: any) => {
-      ctx.startX = translateX.value;
-      ctx.startY = translateY.value;
-    },
-    onActive: (event, ctx: any) => {
-      translateX.value = ctx.startX + event.translationX;
-      translateY.value = ctx.startY + event.translationY;
-    },
-    onEnd: () => {
-      const limits = getPanLimits(scale.value);
-      translateX.value = withSpring(clamp(translateX.value, limits.minX, limits.maxX));
-      translateY.value = withSpring(clamp(translateY.value, limits.minY, limits.maxY));
-    },
-  });
+  const panHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, { startX: number; startY: number }>(
+    {
+      onStart: (_, ctx) => {
+        ctx.startX = translateX.value;
+        ctx.startY = translateY.value;
+      },
+      onActive: (event, ctx) => {
+        const limits = getPanLimits(scale.value);
+        translateX.value = clamp(ctx.startX + event.translationX, limits.minX, limits.maxX);
+        translateY.value = clamp(ctx.startY + event.translationY, limits.minY, limits.maxY);
+      },
+      onEnd: (event) => {
+        const limits = getPanLimits(scale.value);
+        translateX.value = withDecay({
+          velocity: event.velocityX,
+          clamp: [limits.minX, limits.maxX],
+        });
+        translateY.value = withDecay({
+          velocity: event.velocityY,
+          clamp: [limits.minY, limits.maxY],
+        });
+      },
+    }
+  );
 
-  const pinchHandler = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent, { startScale: number }>({
-
-    onStart: (_, ctx: any) => {
+  const pinchHandler = useAnimatedGestureHandler<
+    PinchGestureHandlerGestureEvent,
+    {
+      startScale: number;
+      focalX: number;
+      focalY: number;
+      startTranslateX: number;
+      startTranslateY: number;
+    }
+  >({
+    onStart: (event, ctx) => {
       ctx.startScale = scale.value;
+      ctx.focalX = event.focalX;
+      ctx.focalY = event.focalY;
+      ctx.startTranslateX = translateX.value;
+      ctx.startTranslateY = translateY.value;
     },
-    onActive: (event, ctx: any) => {
-      scale.value = event.scale;
+    onActive: (event, ctx) => {
+      const nextScale = clamp(ctx.startScale * event.scale, MIN_SCALE, MAX_SCALE);
+
+      // Schaalverandering ten opzichte van huidige schaal
+      const scaleChange = nextScale / scale.value;
+
+      // Nieuwe translate waardes zodat zoompunt onder de vingers blijft
+      translateX.value = clamp(
+        ctx.startTranslateX + (event.focalX - ctx.focalX) - (scaleChange - 1) * ctx.focalX,
+        getPanLimits(nextScale).minX,
+        getPanLimits(nextScale).maxX
+      );
+      translateY.value = clamp(
+        ctx.startTranslateY + (event.focalY - ctx.focalY) - (scaleChange - 1) * ctx.focalY,
+        getPanLimits(nextScale).minY,
+        getPanLimits(nextScale).maxY
+      );
+
+      scale.value = nextScale;
     },
     onEnd: () => {
       const limits = getPanLimits(scale.value);
@@ -114,49 +145,41 @@ const HomeScreen = () => {
     setSelectedLocation(location);
   };
 
-  const { scale: imgScale, offsetX, offsetY } = getImageLayout();
-
+  // Render de kaart met markers en interacties
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <PinchGestureHandler onGestureEvent={pinchHandler}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>NHL Stenden - Map</Text>
+      </View>
+
+      <PanGestureHandler onGestureEvent={panHandler}>
         <Animated.View style={{ flex: 1 }}>
-          <PanGestureHandler onGestureEvent={panHandler}>
-            <Animated.View style={{ flex: 1 }}>
-              <View style={styles.header}>
-                <Text style={styles.headerTitle}>NHL Stenden - Map</Text>
-              </View>
-              <Animated.Image
-                source={require('../../assets/images/nhl-stenden-1.png')}
-                style={[
-                  {
-                    width: imageWidth,
-                    height: imageHeight,
-                    alignSelf: 'center',
-                  },
-                  animatedStyle,
-                ]}
-                resizeMode="contain"
-              />
-              {/* Markers */}
-              {schoolLocations.map((location) => (
-                <MapMarker
-                  key={location.id}
-                  location={location}
-                  onPress={() => handleMarkerPress(location)}
-                  imgScale={imgScale}
-                  offsetX={offsetX}
-                  offsetY={offsetY}
+          <PinchGestureHandler onGestureEvent={pinchHandler}>
+            <Animated.View style={[{ flex: 1 }]}>
+              <Animated.View style={[styles.mapContainer, animatedStyle]}>
+                <Image
+                  source={require('../../assets/images/nhl-stenden-1.png')}
+                  style={styles.mapImage}
+                  resizeMode="contain"
                 />
-              ))}
+                {schoolLocations.map((location) => (
+                  <MapMarker
+                    key={location.id}
+                    location={location}
+                    onPress={() => handleMarkerPress(location)}
+                  />
+                ))}
+              </Animated.View>
             </Animated.View>
-          </PanGestureHandler>
-        </Animated.View>
-      </PinchGestureHandler>
+          </PinchGestureHandler>
+        </Animated.View> 
+      </PanGestureHandler>
+
       <LocationModal
         location={selectedLocation}
         visible={!!selectedLocation}
         onClose={() => setSelectedLocation(null)}
-        onZoomTo={() => {/* optioneel: zoom naar marker */}}
+        onZoomTo={() => {}}
       />
     </GestureHandlerRootView>
   );
@@ -171,17 +194,29 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: '#005aa7',
     justifyContent: 'center',
+    alignItems: 'flex-start',
     padding: 15,
     zIndex: 10,
     elevation: 5,
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.4)',
   },
   headerTitle: {
     fontSize: 20,
-    fontFamily: 'Arial',
     fontWeight: 'bold',
-    color: '#ffff',
+    color: '#fff',
+  },
+  mapContainer: {
+    position: 'absolute',
+    top: 60,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapImage: {
+    width: imageWidth,
+    height: imageHeight,
   },
 });
 
-export default HomeScreen;
+export default MapScreen;
