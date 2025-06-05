@@ -4,7 +4,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Homescreen from './screens/homescreen';
 import Chatbot from './screens/chatbot'
-
 const Tab = createBottomTabNavigator()
 
 export default function Index() {
