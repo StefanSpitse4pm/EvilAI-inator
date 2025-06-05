@@ -3,7 +3,7 @@ from fastapi.responses import StreamingResponse
 from starlette.responses import Response
 from conversations import service
 from dependencies import verify_token
-from database import fetch_one, execute
+from database import fetch_one, execute, fetch_all
 from sqlalchemy import select
 from user.models import User
 from conversations.models import Conversation, Prompt
@@ -70,4 +70,22 @@ async def create_conversation(payload: str = Depends(verify_token)):
     )
     return {"conversation_id": result.lastrowid}
 
+@router.get("/conversations/")
+async def get_conversations(payload: str = Depends(verify_token)):
+    """
+    Get all conversations for the authenticated user.
+    """
+    user_email = payload.get('sub')
+    user_id = await fetch_one(select(User.userId).where(User.Email == user_email))
 
+    if not user_id:
+        return Response(status_code=404, content="User not found")
+    
+    conversations = await fetch_all(
+        select(Conversation).where(Conversation.UserID == user_id['userId'])
+    )
+    
+    if not conversations:
+        return Response(status_code=404, content="No conversations found")
+    
+    return conversations
