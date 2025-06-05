@@ -10,6 +10,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 def verify_token(token: str = Depends(oauth2_scheme)):
+    if os.getenv('MOCK_AUTH') == 'True':
+        return {"sub":"user@example.com"}
+
     try:
         payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=[os.getenv('ALGORITHM')])
         return payload
