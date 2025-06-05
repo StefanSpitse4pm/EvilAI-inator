@@ -15,6 +15,7 @@ export interface SchoolLocation {
   phone?: string;
   services?: string[];
   image: string;
+  floor: number;
 }
 
 export const schoolLocations: SchoolLocation[] = [
@@ -31,6 +32,7 @@ export const schoolLocations: SchoolLocation[] = [
     phone: '(555) 123-4567',
     services: ['Books & Journals', 'Computer Access', 'Study Rooms', 'Research Help', 'Printing Services'],
     image: 'https://api.a0.dev/assets/image?text=modern%20university%20library%20interior%20with%20students%20studying&aspect=16:9',
+    floor: 1,
   },
   {
     id: '2',
@@ -45,6 +47,7 @@ export const schoolLocations: SchoolLocation[] = [
     phone: '(555) 234-5678',
     services: ['Dining Hall', 'Game Room', 'Meeting Rooms', 'Student Services', 'ATM'],
     image: 'https://api.a0.dev/assets/image?text=bustling%20university%20student%20center%20with%20students%20socializing&aspect=16:9',
+    floor: 1,
   },
   {
     id: '5',
@@ -59,5 +62,6 @@ export const schoolLocations: SchoolLocation[] = [
     phone: '(555) 567-8901',
     services: ['Multiple Food Stations', 'Salad Bar', 'Grab & Go', 'Special Dietary Options'],
     image: 'https://api.a0.dev/assets/image?text=university%20cafeteria%20with%20food%20stations%20and%20dining%20tables&aspect=16:9',
+    floor: 1,
   },
 ];
