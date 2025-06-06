@@ -6,6 +6,8 @@ import { MaterialCommunityIcons} from '@expo/vector-icons';
 const ChatMenu = forwardRef(({ onChangeChat }, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const chatMenuHandeler = () => setIsVisible(prev => !prev);
+
+
     const [chatData, setChatData] = useState([
         {
             id:1,
@@ -21,6 +23,21 @@ const ChatMenu = forwardRef(({ onChangeChat }, ref) => {
         }
     ])
 
+    useEffect(() => {
+        fetch('http:192.168.2.17:8000/conversations',
+        {
+            method: 'GET',
+            headers: {
+                'Authorization':'Bearer test',
+                'Content-Type': 'application/json',
+            },
+        }
+        )
+        .then(data => {
+            console.log('Fetched chat data:', data);
+        })}
+    , []);
+    
     const screenwidth = Dimensions.get('window').width;
     const slideAnim = useRef(new Animated.Value(-screenwidth)).current 
 
