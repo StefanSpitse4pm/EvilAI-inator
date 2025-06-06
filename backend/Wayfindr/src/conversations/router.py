@@ -89,3 +89,23 @@ async def get_conversations(payload: str = Depends(verify_token)):
         return Response(status_code=404, content="No conversations found")
     
     return conversations
+
+@router.get("prompts/{conversation_id}")
+async def get_prompts(conversation_id: int, payload: str = Depends(verify_token)):
+    """
+    Get all prompts for a specific conversation.
+    """
+    user_email = payload.get('sub')
+    user_id = await fetch_one(select(User.userId).where(User.Email == user_email))
+
+    if not user_id:
+        return Response(status_code=404, content="User not found")
+    
+    prompts = await fetch_all(
+        select(Prompt).where(Prompt.ConversationID == conversation_id)
+    )
+    
+    if not prompts:
+        return Response(status_code=404, content="No prompts found for this conversation")
+    
+    return prompts
