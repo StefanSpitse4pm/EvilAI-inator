@@ -12,7 +12,8 @@ export default function Chatbot() {
     {id: 1, text: 'dit is een test', isAI: true}
   ]);
   const chatMenuRef = useRef<ChatMenuHandle | null>(null);
-
+  const [conversationId, setConversationId] = useState<number | null>(null);
+  
   const sendMessage = async () => {
     const userMessage = {
       id: messages.length + 1,
@@ -21,13 +22,68 @@ export default function Chatbot() {
     };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
-  };
+    setIsLoading(true)
 
-  const newChat = (chat: []) => {
+    try {
+      const response = await fetch(`http://192.168.2.17:8000/ask?message=${encodeURIComponent(input.trim())}&conversation_id=${Number(conversationId)}`,{
+        method: 'POST',
+        headers:{
+          'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+        },
+      });
+
+      if (!response.body) throw new Error('no response body');
+      
+      const reader = response.body?.getReader();
+      let aiText = '';
+      let done = false;
+      let aiMessageId = messages.length + 2;
+
+      setMessages(prev => [
+        ...prev,
+        {id: aiMessageId,isAI:true, text:''}
+      ]);
+      if (reader) {
+        while (!done) {
+          const { value, done: streamDone } = await reader.read();
+          done = streamDone;
+          if (value) {
+            const chunk = new TextDecoder().decode(value);
+            aiText += chunk;
+
+            setMessages(prev =>
+              prev.map(msg =>
+                msg.id === aiMessageId ? { ...msg, text: aiText } : msg
+              )
+            );
+          }
+
+        }
+      }
+
+    } catch (error) {
+      console.log(error)
+      setMessages(prev => [
+      ...prev,
+      { id: messages.length + 2, isAI: true, text: 'Er is een fout opgetreden.' }
+    ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const newChat = (chat: any[] = [], conversationId: number) => {
     setMessages(chat);
+    setConversationId(conversationId)
   };
 
-  const MessageWrapper = ({ message }) => {
+  type Message = {
+    id: number;
+    text: string;
+    isAI: boolean;
+  };
+
+  const MessageWrapper = ({ message }: { message: Message }) => {
     return (
       <View style={[
         styles.messageContent,

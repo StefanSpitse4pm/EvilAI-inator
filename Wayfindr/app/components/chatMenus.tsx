@@ -6,7 +6,7 @@ import { MaterialCommunityIcons} from '@expo/vector-icons';
 const API_BASE_URL = 'http://192.168.2.17:8000';
 
 interface ChatMenuProps {
-    onChangeChat: (chat: any[]) => void;
+    onChangeChat: (chat: any[], conversationId: number) => void;
 }
 
 const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
@@ -34,7 +34,7 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
         .then((data: any[]) => {
             Promise.all(
                 data.map(async (chat: any, index: number) => {
-                    chat.id = index + 1;
+                    console.log(chat)
                     const response = await fetch(`${API_BASE_URL}/prompts/` + chat['ConversationID'], {
                         method: 'GET',
                         headers: {
@@ -53,17 +53,17 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
                             {
                                 id: prompt.PromptID * 2,
                                 isAI: true,
-                                text: prompt.Response.replace(/<think>[\s\S]*?<\/think>/g, '').trim(),
+                                text: prompt.Response.replace(/<think>[\s\S]*?<\/think>/gi, '').trim(),
                             }
                         ]);
                         return {
-                            id: chat.id,
+                            id: chat.ConversationID,
                             messages: chatMessages,
                             date: chat.Created_at,
                         };
                     } else if (response.status === 404) {
                         return {
-                            id: chat.id,
+                            id: chat.ConversationID,
                             messages: [],
                             date: chat.Created_at,
                         };
@@ -87,8 +87,8 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
         }).start();
     }, [isVisible]);
 
-    const handleChatChange = (chat: any[]) => {
-        onChangeChat(chat);
+    const handleChatChange = (chat: Chat) => {
+        onChangeChat(chat.messages, chat.id);
         chatMenuHandeler();
     }
 
@@ -103,15 +103,16 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
                 'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
                 'Content-Type': 'application/json',
             }
-        }).then(response => response.json())
+        })
+        .then(response => response.json())
         .then((data: any) => {
             const newChat: Chat = {
-                id: data.ConversationID,
+                id: data.conversation_id,
                 messages: [],
                 date: data.Created_at,
             };
             setChatData(prevChats => [...prevChats, newChat]);
-            handleChatChange(newChat.messages);
+            handleChatChange(newChat);
         })
         .catch(error => {
             console.error('Error creating new chat:', error);
@@ -147,7 +148,7 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
             ) : (
             chatData.map(chat => (
                 <View key={chat.id} style={styles.newIcon}>
-                    <TouchableHighlight onPress={() => { handleChatChange(chat.messages)}}>
+                    <TouchableHighlight onPress={() => { handleChatChange(chat)}}>
                         <Text style={styles.menuItem}>{ chat.date }</Text>
                     </TouchableHighlight>
                     <TouchableHighlight>
