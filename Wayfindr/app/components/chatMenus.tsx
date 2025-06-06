@@ -2,41 +2,79 @@ import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } f
 import { Text, ScrollView, StyleSheet, View, SafeAreaView, Pressable, TouchableHighlight, TouchableOpacity, Animated, Dimensions} from 'react-native';
 import { MaterialCommunityIcons} from '@expo/vector-icons';
 
+// Define the API base URL here
+const API_BASE_URL = 'http://192.168.2.17:8000';
 
-const ChatMenu = forwardRef(({ onChangeChat }, ref) => {
+interface ChatMenuProps {
+    onChangeChat: (chat: any[]) => void;
+}
+
+const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const chatMenuHandeler = () => setIsVisible(prev => !prev);
+    const [isLoading, setIsLoading] = useState(true);
 
-
-    const [chatData, setChatData] = useState([
-        {
-            id:1,
-            name:'first generated chat',
-            messages: [{id:1, text:'what no wayyyyy' , isAI:false}, {id:2, text:'what no wayy againnnnnnnn' , isAI:true}],
-            date:'16-6-2025',
-        }, 
-        {
-            id:2,   
-            name:'second generated chat',
-            messages: [{id:1, text:'what no wayy jose' , isAI:false}, {id:2, text:'what no wayayayaya oh my gawd' , isAI:true}],
-            date:'16-6-2025',
-        }
-    ])
+    interface Chat {
+        id: number;
+        messages: any[];
+        date: string;
+    }
+    const [chatData, setChatData] = useState<Chat[]>([])
 
     useEffect(() => {
-        fetch('http:192.168.2.17:8000/conversations',
+        fetch(`${API_BASE_URL}/conversations`,
         {
             method: 'GET',
             headers: {
-                'Authorization':'Bearer test',
+                'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
                 'Content-Type': 'application/json',
             },
         }
-        )
-        .then(data => {
-            console.log('Fetched chat data:', data);
-        })}
-    , []);
+        ).then(response => response.json())
+        .then((data: any[]) => {
+            Promise.all(
+                data.map(async (chat: any, index: number) => {
+                    chat.id = index + 1;
+                    const response = await fetch(`${API_BASE_URL}/prompts/` + chat['ConversationID'], {
+                        method: 'GET',
+                        headers: {
+                            'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    if (response.ok) {
+                        const messages = await response.json();
+                        const chatMessages = messages.flatMap((prompt: any) => [
+                            {
+                                id: prompt.PromptID * 2 - 1,
+                                isAI: false,
+                                text: prompt.Message,
+                            },
+                            {
+                                id: prompt.PromptID * 2,
+                                isAI: true,
+                                text: prompt.Response.replace(/<think>[\s\S]*?<\/think>/g, '').trim(),
+                            }
+                        ]);
+                        return {
+                            id: chat.id,
+                            messages: chatMessages,
+                            date: chat.Created_at,
+                        };
+                    } else if (response.status === 404) {
+                        return {
+                            id: chat.id,
+                            messages: [],
+                            date: chat.Created_at,
+                        };
+                    }
+                })
+            ).then((chats) => {
+                setChatData(chats.filter(Boolean) as Chat[]);
+                setIsLoading(false);
+            });
+        });
+    }, []);
     
     const screenwidth = Dimensions.get('window').width;
     const slideAnim = useRef(new Animated.Value(-screenwidth)).current 
@@ -49,7 +87,7 @@ const ChatMenu = forwardRef(({ onChangeChat }, ref) => {
         }).start();
     }, [isVisible]);
 
-    const handleChatChange = (chat: []) => {
+    const handleChatChange = (chat: any[]) => {
         onChangeChat(chat);
         chatMenuHandeler();
     }
@@ -59,17 +97,31 @@ const ChatMenu = forwardRef(({ onChangeChat }, ref) => {
     }));
 
     const addChat = () => {
-        const newChat = {id: chatData.length + 1, name:'new Chat', messages:[], date:''}
-        setChatData([...chatData, newChat]);
-        handleChatChange(newChat.messages);
+        fetch(`${API_BASE_URL}/conversation`, {
+            method: 'POST',
+            headers: {
+                'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+                'Content-Type': 'application/json',
+            }
+        }).then(response => response.json())
+        .then((data: any) => {
+            const newChat: Chat = {
+                id: data.ConversationID,
+                messages: [],
+                date: data.Created_at,
+            };
+            setChatData(prevChats => [...prevChats, newChat]);
+            handleChatChange(newChat.messages);
+        })
+        .catch(error => {
+            console.error('Error creating new chat:', error);
+        });
     }
 
-    const deleteChat = (chatId) => {
+    const deleteChat = (chatId: number) => {
         const updatedChats = chatData.filter(chat => chat.id !== chatId);
         setChatData(updatedChats);   
     }
-
-
 
     return (
         isVisible && 
@@ -90,11 +142,13 @@ const ChatMenu = forwardRef(({ onChangeChat }, ref) => {
                     />
                 </TouchableOpacity>
             </View>
-
-            {chatData.map(chat => (
+            {isLoading ? (
+                <Text>Loading...</Text>
+            ) : (
+            chatData.map(chat => (
                 <View key={chat.id} style={styles.newIcon}>
                     <TouchableHighlight onPress={() => { handleChatChange(chat.messages)}}>
-                        <Text style={styles.menuItem}>{ chat.name }</Text>
+                        <Text style={styles.menuItem}>{ chat.date }</Text>
                     </TouchableHighlight>
                     <TouchableHighlight>
                         <MaterialCommunityIcons
@@ -108,7 +162,7 @@ const ChatMenu = forwardRef(({ onChangeChat }, ref) => {
                         />
                     </TouchableHighlight>
                 </View>
-            ))}
+            )))}
             </ScrollView>
             <Pressable style={styles.overlay} onPress={chatMenuHandeler}/>
         </Animated.View>
@@ -165,10 +219,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         backgroundColor:'#f5f5f5',
     }
-
-
-
-
 })
 
 export default ChatMenu;
