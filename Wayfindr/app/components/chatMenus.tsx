@@ -22,6 +22,15 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
     const [chatData, setChatData] = useState<Chat[]>([])
 
     useEffect(() => {
+        if (isVisible) {
+            fetchChats();
+        }
+    }, [isVisible]);    
+    const screenwidth = Dimensions.get('window').width;
+    const slideAnim = useRef(new Animated.Value(-screenwidth)).current 
+
+    const fetchChats = () => {
+        setIsLoading(true)
         fetch(`${API_BASE_URL}/conversations`,
         {
             method: 'GET',
@@ -74,10 +83,7 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
                 setIsLoading(false);
             });
         });
-    }, []);
-    
-    const screenwidth = Dimensions.get('window').width;
-    const slideAnim = useRef(new Animated.Value(-screenwidth)).current 
+    }
 
     useEffect(() => {
         Animated.timing(slideAnim, {
@@ -124,6 +130,7 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
         
         const response = fetch(`${API_BASE_URL}/conversation/${chatId}`, {
             method: 'DELETE',
+
             headers: {
                 'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
                 'Content-Type': 'application/json',
