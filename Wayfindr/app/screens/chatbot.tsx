@@ -1,19 +1,21 @@
-import React, {useRef, useState} from "react";
+import React, { useRef, useState } from "react";
 import { View, ScrollView, TextInput, StyleSheet, TouchableOpacity, Text, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ChatMenu, { ChatMenuHandle } from "../components/chatMenus";
 import UniversalHeader from "./components/universalHeader";
 
+const API_BASE_URL = 'http://141.252.152.178:8000';
+
 export default function Chatbot() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
-    {id: 1, text: 'dit is een test', isAI: true}
+    { id: 1, text: 'Wat is je vraag?', isAI: true }
   ]);
   const chatMenuRef = useRef<ChatMenuHandle | null>(null);
   const [conversationId, setConversationId] = useState<number | null>(null);
-  
+
   const sendMessage = async () => {
     const userMessage = {
       id: messages.length + 1,
@@ -24,16 +26,41 @@ export default function Chatbot() {
     setInput('');
     setIsLoading(true)
 
+    let currentConversationId = conversationId
+
+    if (!currentConversationId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/conversation`, {
+          
+            method: 'POST',
+            headers: {
+                'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+                'Content-Type': 'application/json',
+            }
+        })
+        const data = await response.json();
+        currentConversationId = data.conversation_id;
+        setConversationId(currentConversationId);
+      }
+      catch (error) {
+        console.log("Error creating new chat: ". error)
+        setIsLoading(false)
+        return
+      }
+
+      
+    }
+    
     try {
-      const response = await fetch(`http://192.168.2.17:8000/ask?message=${encodeURIComponent(input.trim())}&conversation_id=${Number(conversationId)}`,{
+      const response = await fetch(`http://141.252.152.178:8000/ask?message=${encodeURIComponent(input.trim())}&conversation_id=${currentConversationId}`, {
         method: 'POST',
-        headers:{
-          'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
         },
       });
 
       if (!response.body) throw new Error('no response body');
-      
+
       const reader = response.body?.getReader();
       let aiText = '';
       let done = false;
@@ -41,7 +68,7 @@ export default function Chatbot() {
 
       setMessages(prev => [
         ...prev,
-        {id: aiMessageId,isAI:true, text:''}
+        { id: aiMessageId, isAI: true, text: '' }
       ]);
       if (reader) {
         while (!done) {
@@ -64,9 +91,9 @@ export default function Chatbot() {
     } catch (error) {
       console.log(error)
       setMessages(prev => [
-      ...prev,
-      { id: messages.length + 2, isAI: true, text: 'Er is een fout opgetreden.' }
-    ]);
+        ...prev,
+        { id: messages.length + 2, isAI: true, text: 'Er is een fout opgetreden.' }
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +143,7 @@ export default function Chatbot() {
         }}
       />
 
-      <ScrollView style={styles.messageContainer} contentContainerStyle={{paddingBottom: 16}}>
+      <ScrollView style={styles.messageContainer} contentContainerStyle={{ paddingBottom: 16 }}>
         {messages.map(message => (
           <MessageWrapper key={message.id} message={message} />
         ))}
