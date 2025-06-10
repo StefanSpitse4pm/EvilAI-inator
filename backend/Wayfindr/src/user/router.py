@@ -27,7 +27,7 @@ async def post_user(user: UserCreate):
         select(User).where(User.Email == user.Email))
 
     if db_user:
-        return Response(status_code=400, content="User already exists")
+        return Response(status_code=400, content={"detail":[{"msg":"User already exists"}]})
     new_user = User(
         Voornaam=user.Voornaam,
         Achternaam=user.Achternaam,
@@ -53,7 +53,7 @@ async def post_user(user: UserCreate):
 
     new_user = await fetch_one(select(User).where(User.Email == user.Email))
     if not new_user:
-        return Response(status_code=500, content="Failed to create user")
+        return Response(status_code=500, content={"detail":[{"msg":"Failed to create user"}]})
     
     return UserRead(
         userId=new_user['userId'],
@@ -90,7 +90,7 @@ async def delete_user(user_id: int):
         User.__table__.delete().where(User.userId == user_id),
         commit=True
     )
-    return Response(status_code=204, content="User deleted successfully")
+    return Response(status_code=204, content={"detail":[{"msg":"User deleted successfully"}]})
 
 
 

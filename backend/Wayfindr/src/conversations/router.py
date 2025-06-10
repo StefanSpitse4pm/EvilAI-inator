@@ -90,7 +90,7 @@ async def get_conversations(payload: str = Depends(verify_token)):
     
     return conversations
 
-@router.get("prompts/{conversation_id}")
+@router.get("/prompts/{conversation_id}")
 async def get_prompts(conversation_id: int, payload: str = Depends(verify_token)):
     """
     Get all prompts for a specific conversation.
