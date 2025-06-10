@@ -71,7 +71,7 @@ async def login(user: UserLogin):
         select(User).where(User.Email == user.Email))
 
     if not db_user or not verify_password(user.Wachtwoord, db_user['Wachtwoord']):
-        return Response(status_code=401, content="Invalid credentials")
+        return Response(status_code=401, content={"detail":[{"msg":"Invalid credentials"}]})
     
     access_token = create_access_token(data={"sub": db_user['Email']}) 
     return {"access_token": access_token, "token_type": "bearer"}
@@ -84,7 +84,7 @@ async def delete_user(user_id: int):
     """
     db_user = await fetch_one(select(User).where(User.userId == user_id))
     if not db_user:
-        return Response(status_code=404, content="User not found")
+        return Response(status_code=404, content={"detail":[{"msg":"User not found"}]})
     
     await execute(
         User.__table__.delete().where(User.userId == user_id),
