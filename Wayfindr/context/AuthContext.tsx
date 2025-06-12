@@ -20,7 +20,7 @@ export const AuthProvidor = ({ children }) => {
     }, []);
     
     const signIn = async(token) => {
-        await AsyncStorage.setItem('userToken', token);
+        await AsyncStorage.setItem('userToken', JSON.stringify(token));
         setIsAuthenticated(true)
     }
 
