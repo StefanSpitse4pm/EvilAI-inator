@@ -6,7 +6,7 @@ from user.models import User
 from user.schemas import UserBase, UserCreate, UserRead, UserLogin
 from user.service import get_password_hash, verify_password, create_access_token
 from fastapi.security import OAuth2PasswordBearer
-
+from fastapi.responses import JSONResponse
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 router = APIRouter()
@@ -27,7 +27,7 @@ async def post_user(user: UserCreate):
         select(User).where(User.Email == user.Email))
 
     if db_user:
-        return Response(status_code=400, content="User already exists")
+        return Response(status_code=400, content={"detail":[{"msg":"User already exists"}]})
     new_user = User(
         Voornaam=user.Voornaam,
         Achternaam=user.Achternaam,
@@ -53,7 +53,7 @@ async def post_user(user: UserCreate):
 
     new_user = await fetch_one(select(User).where(User.Email == user.Email))
     if not new_user:
-        return Response(status_code=500, content="Failed to create user")
+        return JSONResponse(status_code=500, content={"detail":[{"msg":"Failed to create user"}]})
     
     return UserRead(
         userId=new_user['userId'],
@@ -71,7 +71,7 @@ async def login(user: UserLogin):
         select(User).where(User.Email == user.Email))
 
     if not db_user or not verify_password(user.Wachtwoord, db_user['Wachtwoord']):
-        return Response(status_code=401, content="Invalid credentials")
+        return JSONResponse(status_code=401, content={"detail":[{"msg":"Invalid credentials"}]})
     
     access_token = create_access_token(data={"sub": db_user['Email']}) 
     return {"access_token": access_token, "token_type": "bearer"}
@@ -84,13 +84,13 @@ async def delete_user(user_id: int):
     """
     db_user = await fetch_one(select(User).where(User.userId == user_id))
     if not db_user:
-        return Response(status_code=404, content="User not found")
+        return Response(status_code=404, content={"detail":[{"msg":"User not found"}]})
     
     await execute(
         User.__table__.delete().where(User.userId == user_id),
         commit=True
     )
-    return Response(status_code=204, content="User deleted successfully")
+    return Response(status_code=204, content={"detail":[{"msg":"User deleted successfully"}]})
 
 
 

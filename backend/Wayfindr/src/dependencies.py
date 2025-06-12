@@ -10,6 +10,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 def verify_token(token: str = Depends(oauth2_scheme)):
+    if os.getenv('MOCK_AUTH') == 'True':
+        return {"sub":"user@example.com"}
+
     try:
         payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=[os.getenv('ALGORITHM')])
         return payload
@@ -17,3 +20,4 @@ def verify_token(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Token expired")
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+    
