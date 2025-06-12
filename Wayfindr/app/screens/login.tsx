@@ -7,7 +7,8 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-
+    const [voornaam, setVoornaam] = useState("")
+    const [achternaam, setAchternaam] = useState("")
     const [isRegister, setIsRegister] = useState(false);
 
     const handleLogin = async() => {
@@ -28,6 +29,7 @@ const Login = () => {
             }
         )
         const data = await response.json();
+        console.log(data)
         if (!response.ok) {
             setError(data.detail[0].msg)
         }
@@ -37,7 +39,7 @@ const Login = () => {
 
     };
 
-    const handleRegister = () => {
+    const handleRegister = async() => {
         if (!email || !password) {
             setError("Please enter email and password.");
             return;
@@ -113,6 +115,21 @@ const Login = () => {
                     <View style={styles.container}>
                         <Text style={styles.title}>Register</Text>
                         {error ? <Text style={styles.error}>{error}</Text> : null}
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Voornaam"
+                            value={voornaam}
+                            onChangeText={setVoornaam}
+                            autoCapitalize="none"
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Achternaam"
+                            value={achternaam}
+                            onChangeText={setAchternaam}
+                            autoCapitalize="none"
+                        />
                         <TextInput
                             style={styles.input}
                             placeholder="Email"
