@@ -71,7 +71,7 @@ async def login(user: UserLogin):
         select(User).where(User.Email == user.Email))
 
     if not db_user or not verify_password(user.Wachtwoord, db_user['Wachtwoord']):
-        return Response(status_code=401, content={"detail":[{"msg":"Invalid credentials"}]})
+        return JSONResponse(status_code=401, content={"detail":[{"msg":"Invalid credentials"}]})
     
     access_token = create_access_token(data={"sub": db_user['Email']}) 
     return {"access_token": access_token, "token_type": "bearer"}
