@@ -6,7 +6,7 @@ from user.models import User
 from user.schemas import UserBase, UserCreate, UserRead, UserLogin
 from user.service import get_password_hash, verify_password, create_access_token
 from fastapi.security import OAuth2PasswordBearer
-
+from fastapi.responses import JSONResponse
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 router = APIRouter()
@@ -53,7 +53,7 @@ async def post_user(user: UserCreate):
 
     new_user = await fetch_one(select(User).where(User.Email == user.Email))
     if not new_user:
-        return Response(status_code=500, content={"detail":[{"msg":"Failed to create user"}]})
+        return JSONResponse(status_code=500, content={"detail":[{"msg":"Failed to create user"}]})
     
     return UserRead(
         userId=new_user['userId'],
