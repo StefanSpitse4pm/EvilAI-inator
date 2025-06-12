@@ -1,15 +1,17 @@
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useState } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
+import { useTheme } from '../Theme/ThemeContext';
 import slideMenu from './sidemenu';
 import { useNavigation } from '@react-navigation/native';
 import SlideMenu from './sidemenu';
 
 export default function HomeScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
+  const { colors } = useTheme();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <TouchableOpacity 
           onPress={() => setMenuVisible(true)}
@@ -17,7 +19,7 @@ export default function HomeScreen() {
         >
           <FontAwesome name="bars" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Home</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Home</Text>
       </View>
 
       <SlideMenu 
@@ -31,7 +33,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -70,5 +71,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
+  },
+  text: {
+    fontSize: 24,
   },
 });

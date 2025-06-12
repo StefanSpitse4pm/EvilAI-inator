@@ -1,6 +1,9 @@
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
+import { useTheme } from '../Theme/ThemeContext';
 
 interface SlideMenuProps {
   isVisible: boolean;
@@ -8,8 +11,12 @@ interface SlideMenuProps {
 }
 
 export default function SlideMenu({ isVisible, onClose }: SlideMenuProps) {
-  const slideAnim = new Animated.Value(-300);
-  const fadeAnim = new Animated.Value(0);
+  const navigation = useNavigation<NavigationProp<any>>();
+  const { colors } = useTheme();
+
+
+  const slideAnim = useRef(new Animated.Value(-300)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (isVisible) {
@@ -45,41 +52,56 @@ export default function SlideMenu({ isVisible, onClose }: SlideMenuProps) {
 
   const menuItems = [
     { icon: 'user' as FontAwesomeIconName, label: 'Account', onPress: () => console.log('Account pressed') },
-    { icon: 'cog' as FontAwesomeIconName, label: 'Settings', onPress: () => console.log('Settings pressed') },
+    {
+      icon: 'cog' as FontAwesomeIconName,
+      label: 'Settings',
+      onPress: () => {
+        navigation.navigate('Settings');
+        onClose();
+      },
+    },
   ];
 
-  const logoutItem = { icon: 'sign-out' as FontAwesomeIconName, label: 'Logout', onPress: () => console.log('Logout pressed') };
+  const logoutItem = {
+    icon: 'sign-out' as FontAwesomeIconName,
+    label: 'Logout',
+    onPress: () => console.log('Logout pressed'),
+  };
 
   if (!isVisible) return null;
 
   return (
     <View style={styles.container}>
-      <Animated.View 
-        style={[styles.overlay, { opacity: fadeAnim }]}
-        onTouchStart={onClose}
-      />
-      <Animated.View style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}>
+      <Animated.View style={[styles.overlay, { opacity: fadeAnim }]} onTouchStart={onClose} />
+      <Animated.View
+        style={[
+          styles.menu,
+          { backgroundColor: colors.card, transform: [{ translateX: slideAnim }] }, // Add transform for sliding
+        ]}
+      >
         <View style={styles.header}>
-          <Text style={styles.headerText}>More</Text>
+          <Text style={[styles.headerText, { color: colors.text }]}>More</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <FontAwesome name="times" size={24} color="#333" />
+            <FontAwesome name="times" size={24} color={colors.icon} />
           </TouchableOpacity>
         </View>
         <View style={styles.menuItems}>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.menuItem}
+              style={[styles.menuItem, { backgroundColor: colors.card }]}
               onPress={item.onPress}
             >
-              <FontAwesome name={item.icon} size={20} color="#333" style={styles.menuIcon} />
-              <Text style={styles.menuText}>{item.label}</Text>
+              <FontAwesome name={item.icon} size={20} color={colors.icon} style={styles.menuIcon} />
+              <Text style={[styles.menuText, { color: colors.text }]}>{item.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
-        {}
         <View style={styles.logoutContainer}>
-          <TouchableOpacity style={[styles.menuItem, styles.logoutButton]} onPress={logoutItem.onPress}>
+          <TouchableOpacity
+            style={[styles.menuItem, styles.logoutButton, { backgroundColor: colors.card }]}
+            onPress={logoutItem.onPress}
+          >
             <FontAwesome name={logoutItem.icon} size={20} color="red" style={styles.menuIcon} />
             <Text style={[styles.menuText, { color: 'red' }]}>{logoutItem.label}</Text>
           </TouchableOpacity>
@@ -108,7 +130,6 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     width: 280,
-    backgroundColor: 'white',
     paddingTop: 50,
     borderTopRightRadius: 20,
     borderBottomRightRadius: 20,
@@ -120,8 +141,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-
-    // Make flex container to push logout to bottom
     flexDirection: 'column',
     justifyContent: 'flex-start',
   },
@@ -146,7 +165,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: 'white',
     borderRadius: 8,
     marginBottom: 10,
     shadowColor: '#000',
