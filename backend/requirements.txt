@@ -6,4 +6,3 @@ uvicorn
 slowapi
 limits
 starlette
-asyncmy

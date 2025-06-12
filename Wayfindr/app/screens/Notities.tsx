@@ -18,6 +18,9 @@ import Animated, { FadeInUp, FadeOutDown } from 'react-native-reanimated';
 import { toast } from 'sonner-native';
 import SlideMenu from './sidemenu'; 
 
+const API_BASE_URL = 'http://141.252.219.186:8000';
+const AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs';
+
 interface Note {
   id: string;
   title: string;
@@ -37,44 +40,74 @@ export default function Notities() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
 
-  
-
   useEffect(() => {
     loadNotes();
   }, []);
 
+  // Fetch all notes from API
   const loadNotes = async () => {
     try {
-      const savedNotes = await AsyncStorage.getItem('notes');
-      if (savedNotes) {
-        setNotes(JSON.parse(savedNotes));
-      }
+      const response = await fetch(`${API_BASE_URL}/note`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${AUTH_TOKEN}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch notes');
+      const data = await response.json();
+      // Map backend fields to frontend Note interface
+      setNotes(
+        data.map((n: any) => ({
+          id: n.id.toString(),
+          title: n.title,
+          content: n.note,
+          date: n.created_at ? new Date(n.created_at).toLocaleDateString() : '',
+          color: n.color,
+        }))
+      );
     } catch (error) {
       toast.error('Failed to load notes');
     }
   };
 
+  // Save or update note via API
   const saveNote = async () => {
     if (!title.trim() || !content.trim()) {
       toast.error('Please fill in both title and content');
       return;
     }
 
-    const updatedNote: Note = {
-      id: editingId ?? Date.now().toString(),
+    const notePayload = {
       title: title.trim(),
       content: content.trim(),
-      date: new Date().toLocaleDateString(),
       color,
     };
 
-    const updatedNotes = editingId
-      ? notes.map((note) => (note.id === editingId ? updatedNote : note))
-      : [updatedNote, ...notes];
-
     try {
-      await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
-      setNotes(updatedNotes);
+      let response;
+      if (editingId) {
+        // Update existing note
+        response = await fetch(`${API_BASE_URL}/note`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${AUTH_TOKEN}`,
+          },
+          body: JSON.stringify({ ...notePayload, id: Number(editingId) }),
+        });
+      } else {
+        // Create new note
+        response = await fetch(`${API_BASE_URL}/note`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${AUTH_TOKEN}`,
+          },
+          body: JSON.stringify(notePayload),
+        });
+      }
+      if (!response.ok) throw new Error('Failed to save note');
+      await loadNotes();
       resetForm();
       toast.success(editingId ? 'Note updated successfully' : 'Note saved successfully');
     } catch (error) {
@@ -82,11 +115,17 @@ export default function Notities() {
     }
   };
 
+  // Delete note via API
   const deleteNote = async (id: string) => {
-    const updatedNotes = notes.filter((note) => note.id !== id);
     try {
-      await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
-      setNotes(updatedNotes);
+      const response = await fetch(`${API_BASE_URL}/note/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${AUTH_TOKEN}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to delete note');
+      await loadNotes();
       toast.success('Note deleted successfully');
     } catch (error) {
       toast.error('Failed to delete note');
