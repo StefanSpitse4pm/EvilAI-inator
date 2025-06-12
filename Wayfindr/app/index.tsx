@@ -4,7 +4,6 @@ import Homescreen from './screens/homescreen';
 import Chatbot from './screens/chatbot';
 import Notities from "./screens/Notities";
 import { Image } from 'react-native';
-
 const Tab = createBottomTabNavigator();
 
 export default function Index() {

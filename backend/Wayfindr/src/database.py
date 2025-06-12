@@ -25,18 +25,17 @@ async def fetch_all(query: Insert | Select | Update, connection: AsyncConnection
     return [r._asdict() for r in cursor.all()]
 
 
-async def execute(query: Insert | Update, connection: AsyncConnection | None = None, commit: bool = False) -> None:
+async def execute(query: Insert | Update, connection: AsyncConnection | None = None, commit: bool = False):
     if connection is None:
         async with engine.connect() as connection:
-            await _execute_query(query, connection, commit)
-            return
-    await _execute_query(query, connection, commit)
+            return await _execute_query(query, connection, commit)
+    return await _execute_query(query, connection, commit)
 
 
 async def _execute_query(query: Insert | Select | Update, connection: AsyncConnection, commit: bool):
     result = await connection.execute(query)
     if commit:
-        await connection.commit()
+        await connection.commit() 
     return result
 
 
