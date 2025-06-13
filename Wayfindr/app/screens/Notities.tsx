@@ -156,7 +156,7 @@ export default function Notities() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuButton}>
           <FontAwesome name="bars" size={24} color="white" />
@@ -188,7 +188,7 @@ export default function Notities() {
                 <TextInput
                   style={styles.titleInput}
                   placeholder="Note Title"
-                  placeholderTextColor={colors.textSecondary}
+                  placeholderTextColor={colors.background === '#f8f9fa' ? '#888' : colors.textSecondary}
                   value={title}
                   onChangeText={setTitle}
                   maxLength={50}
@@ -196,7 +196,7 @@ export default function Notities() {
                 <TextInput
                   style={styles.contentInput}
                   placeholder="Write your note here..."
-                  placeholderTextColor={colors.textSecondary}
+                  placeholderTextColor={colors.background === '#f8f9fa' ? '#888' : colors.textSecondary}
                   value={content}
                   onChangeText={setContent}
                   multiline
@@ -213,7 +213,7 @@ export default function Notities() {
                 </View>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={resetForm}>
-                    <Text style={styles.buttonText}>Cancel</Text>
+                    <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={saveNote}>
                     <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
@@ -256,13 +256,13 @@ const getStyles = (colors: any) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
+      paddingTop: 0,
     },
     header: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: 16,
-      // Blue in light mode, themed in dark mode
       backgroundColor: colors.background === '#f8f9fa' ? '#005aa7' : colors.card,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
@@ -296,7 +296,7 @@ const getStyles = (colors: any) =>
       fontWeight: '600',
       marginBottom: 12,
       padding: 8,
-      backgroundColor: colors.inputBackground,
+      backgroundColor: colors.background === '#f8f9fa' ? '#ededed' : '#181a20', 
       color: colors.text,
       borderRadius: 8,
     },
@@ -304,7 +304,7 @@ const getStyles = (colors: any) =>
       fontSize: 16,
       minHeight: 150,
       padding: 8,
-      backgroundColor: colors.inputBackground,
+   backgroundColor: colors.background === '#f8f9fa' ? '#ededed' : '#181a20',
       color: colors.text,
       borderRadius: 8,
       marginBottom: 16,
@@ -325,7 +325,9 @@ const getStyles = (colors: any) =>
       backgroundColor: colors.cancelButtonBackground,
     },
     saveButton: {
-      backgroundColor: colors.primary,
+      backgroundColor: '#005aa7', 
+      borderColor: '#005aa7',     
+      borderWidth: 2,
     },
     buttonText: {
       fontSize: 16,
@@ -333,16 +335,19 @@ const getStyles = (colors: any) =>
       color: colors.buttonText,
     },
     saveButtonText: {
-      color: 'white',
+      color: colors.background === 'white' ? 'black' : 'white',
+    },
+    cancelButtonText: {
+      color: colors.background === '#f8f9fa' ? 'black' : 'white',
     },
     notesList: {
       padding: 16,
     },
     emptyText: {
       textAlign: 'center',
-      color: colors.textSecondary,
+      color: colors.background === '#f8f9fa' ? 'black' : 'white',
       fontSize: 16,
-      marginTop: 32,
+      marginTop: 80,
     },
     noteCard: {
       padding: 16,
