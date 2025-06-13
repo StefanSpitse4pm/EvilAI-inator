@@ -38,9 +38,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   markerIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 8 ,
+    width: 48,
+    height: 48,
+    borderRadius: 30 ,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,

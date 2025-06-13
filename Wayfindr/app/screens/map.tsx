@@ -22,7 +22,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import MapMarker from '../../components/MapMarker';
 import LocationModal from '../../components/LocationModal';
+import StaticMarker from '../../components/StaticMarker';
 import { SchoolLocation, schoolLocations } from '../../data/schooldata';
+import { staticMarkers } from '../../data/schoolprops';
 
 // 📱 Schermdimensies
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -182,20 +184,46 @@ const MapScreen = () => {
           <PinchGestureHandler onGestureEvent={pinchHandler}>
             <Animated.View style={{ flex: 1 }}>
               <Animated.View style={[styles.mapContainer, animatedStyle]}>
-                <Image
-                  source={getFloorImage()}
-                  style={styles.mapImage}
-                  resizeMode="contain"
-                />
-                {schoolLocations
-                  .filter((location) => location.floor === floor)
-                  .map((location) => (
-                    <MapMarker
-                      key={location.id}
-                      location={location}
-                      onPress={() => handleMarkerPress(location)}
-                    />
-                  ))}
+                <View style={styles.absoluteWrapper}>
+                  <Image
+                    source={getFloorImage()}
+                    style={styles.mapImage}
+                    resizeMode="contain"
+                  />
+                  
+                  {schoolLocations
+                    .filter((location) => location.floor === floor)
+                    .map((location) => (
+                      <View
+                        key={location.id}
+                        style={{
+                          position: 'absolute',
+                          left: location.x,
+                          top: location.y,
+                        }}
+                      >
+                        <MapMarker
+                          location={location}
+                          onPress={() => handleMarkerPress(location)}
+                        />
+                      </View>
+                    ))}
+
+                  {staticMarkers
+                    .filter((marker) => marker.floor === floor)
+                    .map((marker) => (
+                      <View
+                        key={marker.id}
+                        style={{
+                          position: 'absolute',
+                          left: marker.x,
+                          top: marker.y,
+                        }}
+                      >
+                        <StaticMarker marker={marker} />
+                      </View>
+                    ))}
+                </View>
               </Animated.View>
             </Animated.View>
           </PinchGestureHandler>
@@ -258,6 +286,10 @@ const styles = StyleSheet.create({
   mapImage: {
     width: imageWidth,
     height: imageHeight,
+  },
+  absoluteWrapper: {
+  width: imageWidth,
+  height: imageHeight,
   },
 });
 
