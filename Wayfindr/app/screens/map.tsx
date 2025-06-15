@@ -81,8 +81,6 @@ const MapScreen = () => {
         return require('../../assets/images/nhl-stenden-1.png');
       case 2:
         return require('../../assets/images/nhl-stenden-2.png');
-      case 3:
-        return require('../../assets/images/nhl-stenden-3.png');
       default:
         return require('../../assets/images/nhl-stenden-1.png');
     }

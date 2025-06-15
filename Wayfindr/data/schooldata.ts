@@ -86,9 +86,9 @@ export const schoolLocations: SchoolLocation[] = [
   },
     {
     id: '7',
-    name: 'Restaurant Stones',
+    name: 'Stones',
     description: 'Restaurant Stones, een populaire eetgelegenheid op de campus van NHL Stenden Emmen. Biedt een gevarieerd menu met zowel lokale als internationale gerechten, perfect voor studenten en personeel.',
-    x: 945,
+    x: 955,
     y: 320,
     icon: 'restaurant-outline',
     color: '#ff0004',
