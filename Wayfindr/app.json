@@ -4,7 +4,7 @@
     "slug": "Wayfindr",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/aipic2.png",
     "scheme": "wayfindr",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.Wayfindr"
     },
     "web": {
       "bundler": "metro",

@@ -17,6 +17,7 @@ python-jose = "*"
 passlib = {extras = ["bcrypt"], version = "*"}
 python-dotenv = "*"
 cryptography = "*"
+requests = "*"
 
 [dev-packages]
 
