@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "*"
+sqlalchemy = "*"
+pandas = "*"
+uvicorn = "*"
+slowapi = "*"
+limits = "*"
+starlette = "*"
+asyncmy = "*"
+pydantic = {extras = ["email"], version = "*"}
+python-jose = "*"
+passlib = {extras = ["bcrypt"], version = "*"}
+python-dotenv = "*"
+cryptography = "*"
+requests = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
