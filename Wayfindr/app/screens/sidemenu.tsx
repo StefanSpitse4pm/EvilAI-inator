@@ -1,15 +1,18 @@
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
 
 interface SlideMenuProps {
   isVisible: boolean;
   onClose: () => void;
+  
 }
 
 export default function SlideMenu({ isVisible, onClose }: SlideMenuProps) {
   const slideAnim = new Animated.Value(-300);
   const fadeAnim = new Animated.Value(0);
+  const router = useRouter();
 
   useEffect(() => {
     if (isVisible) {
@@ -45,7 +48,7 @@ export default function SlideMenu({ isVisible, onClose }: SlideMenuProps) {
 
   const menuItems = [
     { icon: 'user' as FontAwesomeIconName, label: 'Account', onPress: () => console.log('Account pressed') },
-    { icon: 'cog' as FontAwesomeIconName, label: 'Settings', onPress: () => console.log('Settings pressed') },
+    { icon: 'cog' as FontAwesomeIconName, label: 'Settings', onPress: () => { router.push('/screens/Settings'); onClose(); } },
   ];
 
   const logoutItem = { icon: 'sign-out' as FontAwesomeIconName, label: 'Logout', onPress: () => console.log('Logout pressed') };
