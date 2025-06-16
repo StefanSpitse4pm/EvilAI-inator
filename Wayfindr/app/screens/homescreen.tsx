@@ -1,17 +1,23 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 
+const agendaData = [
+  { title: "Afspraak: Atelier", location: "1.016" },
+  { title: "Les: OOP 1.5", location: "1.035" },
+  { title: "Projectoverleg", location: "1.012" },
+  { title: "Reflectie moment", location: "1.020" },
+];
+
+const eventFeedData = [
+  { id: 1, type: "nu", title: "Gastcollege UX" },
+  { id: 2, type: "info", title: "Hackathon vrijdag" },
+  { id: 3, type: "info", title: "Deadline Portfolio" },
+];
+
 const Homescreen = () => {
   return (
     <ScrollView style={styles.container}>
       
-      {/* Blauwe topbar met menu en titel */}
-      <View style={styles.topbar}>
-        <Text style={styles.topbarIcon}>☰</Text>
-        <Text style={styles.topbarTitle}>Wayfindr</Text>
-        <View style={{ width: 24 }} /> {/* lege ruimte voor centreren */}
-      </View>
-
       {/* Welkomstbericht */}
       <View style={styles.welcome}>
         <Text style={styles.welcomeText}>Welkom bij NHL Stenden</Text>
@@ -23,25 +29,39 @@ const Homescreen = () => {
         {/* Agenda */}
         <View style={styles.agenda}>
           <Text style={styles.sectionTitle}>Agenda</Text>
-
-          <View style={styles.agendaItem}>
-            <Text style={styles.bold}>Afspraak: Atelier</Text>
-            <Text>📍 1.016</Text>
-          </View>
-
-          <View style={styles.agendaItem}>
-            <Text style={styles.bold}>Les: OOP 1.5</Text>
-            <Text>📍 1.035</Text>
-          </View>
+          <ScrollView style={{ maxHeight: 300 }}>
+            {agendaData.slice(0, 3).map((item, index) => (
+              <View key={index} style={styles.agendaItem}>
+                <Text style={styles.bold}>{item.title}</Text>
+                <Text>📍 {item.location}</Text>
+              </View>
+            ))}
+          </ScrollView>
         </View>
 
         {/* Event Feed */}
         <View style={styles.eventFeed}>
           <Text style={styles.sectionTitle}>Event Feed</Text>
-
-          <View style={[styles.eventBox, { backgroundColor: "blue", borderColor: "blue" }]} />
-          <View style={[styles.eventBox, { backgroundColor: "red", borderColor: "red" }]} />
-          <View style={[styles.eventBox, { backgroundColor: "green", borderColor: "green" }]} />
+          {eventFeedData.map((event) => (
+            <View
+              key={event.id}
+              style={[
+                styles.eventBox,
+                event.type === "nu"
+                  ? { borderColor: "blue", backgroundColor: "transparent" }
+                  : { backgroundColor: "lightgray", borderColor: "gray" },
+              ]}
+            >
+              <Text
+                style={{
+                  color: event.type === "nu" ? "blue" : "black",
+                  fontWeight: "bold",
+                }}
+              >
+                {event.title}
+              </Text>
+            </View>
+          ))}
         </View>
 
       </View>
@@ -53,22 +73,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-  },
-  topbar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    backgroundColor: "#005EB8",
-    padding: 16,
-  },
-  topbarIcon: {
-    color: "#fff",
-    fontSize: 24,
-  },
-  topbarTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
   },
   welcome: {
     backgroundColor: "#ccc",
@@ -109,7 +113,9 @@ const styles = StyleSheet.create({
     height: 90,
     marginVertical: 5,
     borderWidth: 2,
-    
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
   },
   sectionTitle: {
     fontWeight: "bold",
