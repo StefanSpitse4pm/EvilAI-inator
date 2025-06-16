@@ -23,8 +23,10 @@ import Animated, {
 import MapMarker from '../../components/MapMarker';
 import LocationModal from '../../components/LocationModal';
 import StaticMarker from '../../components/StaticMarker';
+import RoomMarker from '../../components/RoomMarker';
 import { SchoolLocation, schoolLocations } from '../../data/schooldata';
 import { staticMarkers } from '../../data/schoolprops';
+import { schoolRooms } from '../../data/schoolrooms';
 
 // 📱 Schermdimensies
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -203,6 +205,24 @@ const MapScreen = () => {
                         <MapMarker
                           location={location}
                           onPress={() => handleMarkerPress(location)}
+                        />
+                      </View>
+                    ))}
+
+                    {schoolRooms
+                    .filter((rooms) => rooms.floor === floor)
+                    .map((rooms) => (
+                      <View
+                        key={rooms.id}
+                        style={{
+                          position: 'absolute',
+                          left: rooms.x,
+                          top: rooms.y,
+                        }}
+                      >
+                        <MapMarker
+                          location={rooms}
+                          onPress={() => handleMarkerPress(rooms)}
                         />
                       </View>
                     ))}
