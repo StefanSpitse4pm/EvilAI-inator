@@ -29,6 +29,10 @@ interface Note {
 const colorOptions = ['#9399FF', '#93FFA3', '#FFA770', '#FFFA70', '#FE5858', '#005aa7'];
 
 export default function Notities() {
+  const { colors } = useTheme();
+
+  const styles = getStyles(colors);
+
   const [notes, setNotes] = useState<Note[]>([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -354,3 +358,7 @@ const styles = StyleSheet.create({
     borderColor: '#007AFF',
   },
 });
+function useTheme(): { colors: any; } {
+  throw new Error('Function not implemented.');
+}
+
