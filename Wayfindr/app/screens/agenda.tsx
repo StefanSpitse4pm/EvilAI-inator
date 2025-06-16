@@ -36,11 +36,11 @@ const categorieUitleg = {
 
 // Voorbeelddata voor afspraken
 const initialAfspraken: Afspraak[] = [
-  { id: 1, title: 'Informatica', time: '10:00 AM', date: '2025-05-28', category: 'Les', location: '' },
-  { id: 2, title: 'Project', time: '11:00 AM', date: '2025-05-29', category: 'Kick-off', location: '' },
-  { id: 3, title: 'Engels', time: '12:00 PM', date: '2025-05-30', category: 'Toets', location: '' },
-  { id: 4, title: 'Sport', time: '13:00 PM', date: '2025-06-01', category: 'Activiteit', location: '' },
-  { id: 5, title: 'Presentatie', time: '14:00 PM', date: '2025-06-02', category: 'Assessment', location: '' },
+  { id: 1, title: 'Informatica', time: '10:00', date: '2025-05-28', category: 'Les', location: '' },
+  { id: 2, title: 'Project', time: '11:00', date: '2025-05-29', category: 'Kick-off', location: '' },
+  { id: 3, title: 'Engels', time: '12:00', date: '2025-05-30', category: 'Toets', location: '' },
+  { id: 4, title: 'Sport', time: '13:00', date: '2025-06-01', category: 'Activiteit', location: '' },
+  { id: 5, title: 'Presentatie', time: '14:00', date: '2025-06-02', category: 'Assessment', location: '' },
 ];
 
 export default function Agenda() {
@@ -58,12 +58,15 @@ export default function Agenda() {
   const [dateInput, setDateInput] = useState('');
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showCustomCalendar, setShowCustomCalendar] = useState(false);
+  const [editCategory, setEditCategory] = useState<CategoryType>(categorieOpties[0] as CategoryType);
 
   // Open modal om categorie en details van een bestaande afspraak te bewerken
   const openCategorieModal = (afspraak: Afspraak) => {
     setSelectedAfspraak(afspraak);
     setLocationInput(afspraak.location || '');
     setDateInput(afspraak.date || '');
+    setNewTime(afspraak.time || '');
+    setEditCategory(afspraak.category);
     setModalVisible(true);
   };
 
@@ -82,7 +85,7 @@ export default function Agenda() {
     setAfspraken(afspraken =>
       afspraken.map(afspraak =>
         afspraak.id === selectedAfspraak.id
-          ? { ...afspraak, location: locationInput, date: dateInput }
+          ? { ...afspraak, location: locationInput, date: dateInput, time: newTime, category : editCategory}
           : afspraak
       )
     );
@@ -169,7 +172,9 @@ export default function Agenda() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalHeader}>Selecteer een categorie</Text>
-            {/* Categorie kleurkeuze */}
+            <Text style={{ color: '#888', marginBottom: 8, fontSize: 13 }}>
+              {categorieUitleg[editCategory]}
+            </Text>
             <View style={styles.colorPickerContainer}>
               {categorieOpties.map(opt => (
                 <TouchableOpacity
@@ -177,10 +182,11 @@ export default function Agenda() {
                   style={[
                     styles.colorOption,
                     { backgroundColor: categoryColors[opt as CategoryType] },
-                    selectedAfspraak?.category === opt && styles.selectedColor
+                    editCategory === opt && styles.selectedColor
                   ]}
-                  onPress={() => selectedAfspraak && handleCategorieChange(selectedAfspraak.id, opt as CategoryType)}
-                />
+                  onPress={() => setEditCategory(opt as CategoryType)}
+                >
+                </TouchableOpacity>
               ))}
             </View>
             {/* Locatie invoer */}
@@ -238,7 +244,7 @@ export default function Agenda() {
               onPress={() => setShowTimePicker(true)}
             >
               <Text style={{ color: newTime ? '#222' : '#888' }}>
-                {newTime ? newTime : 'Tijd (bijv. 10:00 AM)'}
+                {newTime ? newTime : 'Tijd (bijv. 10:00)'}
               </Text>
             </TouchableOpacity>
             {showTimePicker && (
@@ -290,7 +296,7 @@ export default function Agenda() {
             {/* Tijd invoer */}
             <TextInput
               style={styles.locationInput}
-              placeholder="Tijd (bijv. 10:00 AM)"
+              placeholder="Tijd (bijv. 10:00)"
               placeholderTextColor="#888"
               value={newTime}
               onChangeText={setNewTime}
