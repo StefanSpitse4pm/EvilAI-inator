@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Calendar } from 'react-native-calendars';
 
@@ -60,6 +60,11 @@ export default function Agenda() {
   const [showCustomCalendar, setShowCustomCalendar] = useState(false);
   const [editCategory, setEditCategory] = useState<CategoryType>(categorieOpties[0] as CategoryType);
 
+  // State hooks voor foutmeldingen en feedback
+  const [addError, setAddError] = useState('');
+  const [editError, setEditError] = useState('');
+  const [feedback, setFeedback] = useState('');
+
   // Open modal om categorie en details van een bestaande afspraak te bewerken
   const openCategorieModal = (afspraak: Afspraak) => {
     setSelectedAfspraak(afspraak);
@@ -82,6 +87,10 @@ export default function Agenda() {
   // Sla wijzigingen in locatie en datum op voor een bestaande afspraak
   const handleSaveLocation = () => {
     if (!selectedAfspraak) return;
+    if (!dateInput || !newTime) {
+      setEditError('Vul een geldige datum en tijd in.');
+      return;
+    }
     setAfspraken(afspraken =>
       afspraken.map(afspraak =>
         afspraak.id === selectedAfspraak.id
@@ -89,7 +98,10 @@ export default function Agenda() {
           : afspraak
       )
     );
+    setEditError('');
     setModalVisible(false);
+    setFeedback('Afspraak bijgewerkt!');
+    setTimeout(() => setFeedback(''), 2000);
   };
 
   // Open modal om een nieuwe afspraak toe te voegen
@@ -103,7 +115,10 @@ export default function Agenda() {
 
   // Voeg een nieuwe afspraak toe aan de lijst
   const handleAddAfspraak = () => {
-    if (!newTitle || !newTime || !newDate) return;
+    if (!newTitle || !newTime || !newDate) {
+      setAddError('Vul een titel, datum en tijd in.');
+      return;
+    }
     const newAfspraak: Afspraak = {
       id: afspraken.length ? afspraken[afspraken.length - 1].id + 1 : 1,
       title: newTitle,
@@ -113,12 +128,26 @@ export default function Agenda() {
       location: newLocation,
     };
     setAfspraken([...afspraken, newAfspraak]);
+    setAddError('');
     setAddModalVisible(false);
+    setFeedback('Afspraak toegevoegd!');
+    setTimeout(() => setFeedback(''), 2000);
   };
 
-  // Verwijder een afspraak uit de lijst
+  // Verwijder een afspraak uit de lijst met bevestiging
   const handleDeleteAfspraak = (id: number) => {
-    setAfspraken(afspraken => afspraken.filter(afspraak => afspraak.id !== id));
+    const afspraak = afspraken.find(a => a.id === id);
+    Alert.alert(
+      'Afspraak verwijderen',
+      `Weet je zeker dat je de afspraak "${afspraak?.title}" wilt verwijderen?`,
+      [
+        { text: 'Annuleren', style: 'cancel' },
+        { text: 'Verwijderen', style: 'destructive', onPress: () => {
+            setAfspraken(afspraken => afspraken.filter(afspraak => afspraak.id !== id));
+          }
+        },
+      ]
+    );
   };
 
   return (
@@ -130,37 +159,54 @@ export default function Agenda() {
           <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
       </View>
-      {/* Lijst met afspraken */}
-      <FlatList
-        data={afspraken}
-        keyExtractor={item => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={[
-            styles.afspraak,
-            {
-              backgroundColor: categoryColors[item.category as CategoryType] || '#fff',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }
-          ]}>
-            {/* Klikbaar: open bewerk-modal */}
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => openCategorieModal(item)}>
-              <Text style={styles.titel}>{item.title}</Text>
-              <Text>{item.time}</Text>
-              <Text>{item.date}</Text>
-              <Text style={{ marginTop: 5, fontStyle: 'italic' }}>{item.category}</Text>
-              {item.location ? (
-                <Text style={{ marginTop: 5, color: '#555' }}>📍 {item.location}</Text>
-              ) : null}
-            </TouchableOpacity>
-            {/* Verwijder-knop */}
-            <TouchableOpacity onPress={() => handleDeleteAfspraak(item.id)} style={styles.deleteButton}>
-              <Text style={styles.trashIcon}>🗑️</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
+      {/* Feedbackmelding */}
+      {feedback ? (
+        <View style={{ backgroundColor: '#DFF0D8', padding: 10, borderRadius: 8, marginBottom: 10 }}>
+          <Text style={{ color: '#3C763D', textAlign: 'center', fontWeight: 'bold' }}>{feedback}</Text>
+        </View>
+      ) : null}
+      {/* Lijst met afspraken of lege lijst feedback */}
+      {afspraken.length === 0 ? (
+        <View style={{ alignItems: 'center', marginTop: 40 }}>
+          <Text style={{ color: '#888', fontSize: 16 }}>Nog geen afspraken gepland!</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={[...afspraken].sort((a, b) => {
+            // Vergelijk eerst op datum, dan op tijd
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
+            return dateA.getTime() - dateB.getTime();
+          })}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={[
+              styles.afspraak,
+              {
+                backgroundColor: categoryColors[item.category as CategoryType] || '#fff',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }
+            ]}>
+              {/* Klikbaar: open bewerk-modal */}
+              <TouchableOpacity style={{ flex: 1 }} onPress={() => openCategorieModal(item)}>
+                <Text style={styles.titel}>{item.title}</Text>
+                <Text>{item.time}</Text>
+                <Text>{item.date}</Text>
+                <Text style={{ marginTop: 5, fontStyle: 'italic' }}>{item.category}</Text>
+                {item.location ? (
+                  <Text style={{ marginTop: 5, color: '#555' }}>📍 {item.location}</Text>
+                ) : null}
+              </TouchableOpacity>
+              {/* Verwijder-knop */}
+              <TouchableOpacity onPress={() => handleDeleteAfspraak(item.id)} style={styles.deleteButton}>
+                <Text style={styles.trashIcon}>🗑️</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      )}
 
       {/* Bewerken modal */}
       <Modal
@@ -171,7 +217,8 @@ export default function Agenda() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>Selecteer een categorie</Text>
+            <Text style={styles.modalHeader}>Afspraak bewerken</Text>
+            <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Selecteer een categorie.</Text>
             <Text style={{ color: '#888', marginBottom: 8, fontSize: 13 }}>
               {categorieUitleg[editCategory]}
             </Text>
@@ -197,31 +244,44 @@ export default function Agenda() {
               value={locationInput}
               onChangeText={setLocationInput}
             />
-            {/* Datum veld met custom kalender */}
-            <TouchableOpacity
-              style={styles.locationInput}
-              onPress={() => setShowCustomCalendar(true)}
-            >
-              <Text style={{ color: newDate ? '#222' : '#888' }}>
-                {newDate ? newDate : 'Datum (bijv. 2025-05-28)'}
-              </Text>
-            </TouchableOpacity>
+            {/* Bewerken modal: datum en tijd naast elkaar */}
+            <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+              {/* Datum veld met custom kalender */}
+              <TouchableOpacity
+                style={[styles.locationInput, { flex: 1, marginRight: 5 }]}
+                onPress={() => setShowCustomCalendar(true)}
+              >
+                <Text style={{ color: newDate ? '#222' : '#888' }}>
+                  {newDate ? newDate : 'Kies een datum'}
+                </Text>
+              </TouchableOpacity>
+              {/* Tijd kiezen via timepicker */}
+              <TouchableOpacity
+                style={[styles.locationInput, { flex: 1, marginLeft: 5 }]}
+                onPress={() => setShowTimePicker(true)}
+              >
+                <Text style={{ color: newTime ? '#222' : '#888' }}>
+                  {newTime ? newTime : 'Kies een tijd'}
+                </Text>
+              </TouchableOpacity>
+            </View>
             {showCustomCalendar && (
-              <View style={{
-                backgroundColor: '#fff',
-                borderRadius: 12,
-                padding: 10,
-                marginVertical: 10,
-                elevation: 5,
-              }}>
+              <View style={{ alignItems: 'center', marginVertical: 10 }}>
+                <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Selecteer een datum.</Text>
                 <Calendar
                   onDayPress={day => {
-                    setNewDate(day.dateString);
-                    setShowCustomCalendar(false);
+                    // Alleen toekomstige datums selecteren
+                    const today = new Date();
+                    const selected = new Date(day.dateString);
+                    if (selected >= new Date(today.getFullYear(), today.getMonth(), today.getDate())) {
+                      setNewDate(day.dateString);
+                      setShowCustomCalendar(false);
+                    }
                   }}
                   markedDates={{
                     [newDate]: { selected: true, selectedColor: '#007AFF' }
                   }}
+                  minDate={new Date().toISOString().split('T')[0]}
                   theme={{
                     backgroundColor: '#fff',
                     calendarBackground: '#fff',
@@ -234,33 +294,27 @@ export default function Agenda() {
                     arrowColor: '#007AFF',
                     monthTextColor: '#222',
                   }}
+                  disableAllTouchEventsForDisabledDays={true}
                 />
               </View>
             )}
-
-            {/* Tijd kiezen via timepicker */}
-            <TouchableOpacity
-              style={styles.locationInput}
-              onPress={() => setShowTimePicker(true)}
-            >
-              <Text style={{ color: newTime ? '#222' : '#888' }}>
-                {newTime ? newTime : 'Tijd (bijv. 10:00)'}
-              </Text>
-            </TouchableOpacity>
             {showTimePicker && (
-              <DateTimePicker
-                value={newTime ? new Date(`1970-01-01T${newTime}`) : new Date()}
-                mode="time"
-                display="default"
-                onChange={(event, selectedTime) => {
-                  setShowTimePicker(false);
-                  if (selectedTime) {
-                    const hours = selectedTime.getHours().toString().padStart(2, '0');
-                    const minutes = selectedTime.getMinutes().toString().padStart(2, '0');
-                    setNewTime(`${hours}:${minutes}`);
-                  }
-                }}
-              />
+              <View style={{ alignItems: 'center', marginVertical: 10 }}>
+                <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Selecteer een tijd.</Text>
+                <DateTimePicker
+                  value={newTime ? new Date(`1970-01-01T${newTime}`) : new Date()}
+                  mode="time"
+                  display="default"
+                  onChange={(event, selectedTime) => {
+                    setShowTimePicker(false);
+                    if (selectedTime) {
+                      const hours = selectedTime.getHours().toString().padStart(2, '0');
+                      const minutes = selectedTime.getMinutes().toString().padStart(2, '0');
+                      setNewTime(`${hours}:${minutes}`);
+                    }
+                  }}
+                />
+              </View>
             )}
             {/* Annuleren en opslaan knoppen */}
             <View style={{ flexDirection: 'row', marginTop: 20 }}>
@@ -271,6 +325,10 @@ export default function Agenda() {
                 <Text style={{ color: '#fff', fontWeight: 'bold' }}>Opslaan</Text>
               </TouchableOpacity>
             </View>
+            {/* Bewerken modal: foutmelding */}
+            {editError ? (
+              <Text style={{ color: 'red', marginBottom: 8 }}>{editError}</Text>
+            ) : null}
           </View>
         </View>
       </Modal>
@@ -288,60 +346,49 @@ export default function Agenda() {
             {/* Titel invoer */}
             <TextInput
               style={styles.locationInput}
-              placeholder="Titel"
+              placeholder="Titel van de afspraak"
               placeholderTextColor="#888"
               value={newTitle}
               onChangeText={setNewTitle}
             />
-            {/* Tijd kiezen via timepicker */}
-            <TouchableOpacity
-              style={styles.locationInput}
-              onPress={() => setShowTimePicker(true)}
-            >
-              <Text style={{ color: newTime ? '#222' : '#888' }}>
-                {newTime ? newTime : 'Tijd (bijv. 10:00)'}
-              </Text>
-            </TouchableOpacity>
-            {showTimePicker && (
-              <DateTimePicker
-                value={newTime ? new Date(`1970-01-01T${newTime}`) : new Date()}
-                mode="time"
-                display="default"
-                onChange={(event, selectedTime) => {
-                  setShowTimePicker(false);
-                  if (selectedTime) {
-                    const hours = selectedTime.getHours().toString().padStart(2, '0');
-                    const minutes = selectedTime.getMinutes().toString().padStart(2, '0');
-                    setNewTime(`${hours}:${minutes}`);
-                  }
-                }}
-              />
-            )}
-            {/* Datum veld met custom kalender */}
-            <TouchableOpacity
-              style={styles.locationInput}
-              onPress={() => setShowCustomCalendar(true)}
-            >
-              <Text style={{ color: newDate ? '#222' : '#888' }}>
-                {newDate ? newDate : 'Datum (bijv. 2025-05-28)'}
-              </Text>
-            </TouchableOpacity>
+            {/* Datum en tijd naast elkaar */}
+            <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+              {/* Datum veld met custom kalender */}
+              <TouchableOpacity
+                style={[styles.locationInput, { flex: 1, marginRight: 5 }]}
+                onPress={() => setShowCustomCalendar(true)}
+              >
+                <Text style={{ color: newDate ? '#222' : '#888' }}>
+                  {newDate ? newDate : 'Kies een datum'}
+                </Text>
+              </TouchableOpacity>
+              {/* Tijd kiezen via timepicker */}
+              <TouchableOpacity
+                style={[styles.locationInput, { flex: 1, marginLeft: 5 }]}
+                onPress={() => setShowTimePicker(true)}
+              >
+                <Text style={{ color: newTime ? '#222' : '#888' }}>
+                  {newTime ? newTime : 'Kies een tijd'}
+                </Text>
+              </TouchableOpacity>
+            </View>
             {showCustomCalendar && (
-              <View style={{
-                backgroundColor: '#fff',
-                borderRadius: 12,
-                padding: 10,
-                marginVertical: 10,
-                elevation: 5,
-              }}>
+              <View style={{ alignItems: 'center', marginVertical: 10 }}>
+                <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Selecteer een datum.</Text>
                 <Calendar
                   onDayPress={day => {
-                    setNewDate(day.dateString);
-                    setShowCustomCalendar(false);
+                    // Alleen toekomstige datums selecteren
+                    const today = new Date();
+                    const selected = new Date(day.dateString);
+                    if (selected >= new Date(today.getFullYear(), today.getMonth(), today.getDate())) {
+                      setNewDate(day.dateString);
+                      setShowCustomCalendar(false);
+                    }
                   }}
                   markedDates={{
                     [newDate]: { selected: true, selectedColor: '#007AFF' }
                   }}
+                  minDate={new Date().toISOString().split('T')[0]}
                   theme={{
                     backgroundColor: '#fff',
                     calendarBackground: '#fff',
@@ -354,11 +401,30 @@ export default function Agenda() {
                     arrowColor: '#007AFF',
                     monthTextColor: '#222',
                   }}
+                  disableAllTouchEventsForDisabledDays={true}
+                />
+              </View>
+            )}
+            {showTimePicker && (
+              <View style={{ alignItems: 'center', marginVertical: 10 }}>
+                <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Selecteer een tijd.</Text>
+                <DateTimePicker
+                  value={newTime ? new Date(`1970-01-01T${newTime}`) : new Date()}
+                  mode="time"
+                  display="default"
+                  onChange={(event, selectedTime) => {
+                    setShowTimePicker(false);
+                    if (selectedTime) {
+                      const hours = selectedTime.getHours().toString().padStart(2, '0');
+                      const minutes = selectedTime.getMinutes().toString().padStart(2, '0');
+                      setNewTime(`${hours}:${minutes}`);
+                    }
+                  }}
                 />
               </View>
             )}
             {/* Categorie uitleg en kleurkeuze */}
-            <Text style={{ marginTop: 10, marginBottom: 5, fontWeight: 'bold' }}>Categorie:</Text>
+            <Text style={{ marginTop: 10, fontWeight: 'bold', marginBottom: 5 }}>Selecteer een categorie.</Text>
             <Text style={{ color: '#888', marginBottom: 8, fontSize: 13 }}>
               {categorieUitleg[newCategory as CategoryType]}
             </Text>
@@ -392,6 +458,10 @@ export default function Agenda() {
                 <Text style={{ color: '#fff', fontWeight: 'bold' }}>Toevoegen</Text>
               </TouchableOpacity>
             </View>
+            {/* Toevoegen modal: foutmelding */}
+            {addError ? (
+              <Text style={{ color: 'red', marginBottom: 8 }}>{addError}</Text>
+            ) : null}
           </View>
         </View>
       </Modal>
