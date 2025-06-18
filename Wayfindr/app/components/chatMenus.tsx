@@ -3,7 +3,7 @@ import { Text, ScrollView, StyleSheet, View, SafeAreaView, Pressable, TouchableH
 import { MaterialCommunityIcons} from '@expo/vector-icons';
 
 // Define the API base URL here
-const API_BASE_URL = 'http://141.252.152.178:8000';
+const API_BASE_URL = 'http://192.168.2.17:8000';
 
 interface ChatMenuProps {
     onChangeChat: (chat: any[], conversationId: number) => void;

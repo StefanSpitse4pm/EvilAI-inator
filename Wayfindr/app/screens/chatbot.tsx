@@ -5,7 +5,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ChatMenu, { ChatMenuHandle } from "../components/chatMenus";
 import UniversalHeader from "./components/universalHeader";
 
-const API_BASE_URL = 'http://141.252.152.178:8000';
+// const API_BASE_URL = 'http://141.252.152.178:8000';
+const API_BASE_URL = 'http://192.168.2.17:8000';
 
 export default function Chatbot() {
   const [input, setInput] = useState('');
@@ -43,7 +44,7 @@ export default function Chatbot() {
         setConversationId(currentConversationId);
       }
       catch (error) {
-        console.log("Error creating new chat: ". error)
+        console.log("Error creating new chat: ", error);
         setIsLoading(false)
         return
       }
@@ -52,42 +53,47 @@ export default function Chatbot() {
     }
     
     try {
-      const response = await fetch(`http://141.252.152.178:8000/ask?message=${encodeURIComponent(input.trim())}&conversation_id=${currentConversationId}`, {
+      const response = await fetch(`${API_BASE_URL}/ask?message=${encodeURIComponent(input.trim())}&conversation_id=${currentConversationId}`, {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+          'Content-Type': 'application/json',
         },
       });
 
-      if (!response.body) throw new Error('no response body');
-
-      const reader = response.body?.getReader();
-      let aiText = '';
-      let done = false;
       let aiMessageId = messages.length + 2;
-
       setMessages(prev => [
         ...prev,
         { id: aiMessageId, isAI: true, text: '' }
       ]);
-      if (reader) {
+
+      // Check if streaming is supported (web only)
+      if (response.body && typeof response.body.getReader === "function") {
+        const reader = response.body.getReader();
+        let aiText = '';
+        let done = false;
         while (!done) {
           const { value, done: streamDone } = await reader.read();
           done = streamDone;
           if (value) {
             const chunk = new TextDecoder().decode(value);
             aiText += chunk;
-
             setMessages(prev =>
               prev.map(msg =>
                 msg.id === aiMessageId ? { ...msg, text: aiText } : msg
               )
             );
           }
-
         }
+      } else {
+        // Fallback for React Native (mobile): no streaming, just update once
+        const aiText = await response.text();
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.id === aiMessageId ? { ...msg, text: aiText } : msg
+          )
+        );
       }
-
     } catch (error) {
       console.log(error)
       setMessages(prev => [

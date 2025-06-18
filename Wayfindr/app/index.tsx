@@ -3,7 +3,6 @@ import { Text, View } from "react-native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
 import Homescreen from './screens/homescreen';
 import Chatbot from './screens/chatbot'
 import Login from './login';

@@ -20,7 +20,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../Theme/ThemeContext';
 
-const API_BASE_URL = 'http://141.252.219.186:8000';
+const API_BASE_URL = 'http://192.168.2.17:8000';
 const AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs';
 
 interface Note {
