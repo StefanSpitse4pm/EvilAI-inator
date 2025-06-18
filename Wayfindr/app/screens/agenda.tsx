@@ -293,14 +293,30 @@ export default function Agenda() {
               value={newTitle}
               onChangeText={setNewTitle}
             />
-            {/* Tijd invoer */}
-            <TextInput
+            {/* Tijd kiezen via timepicker */}
+            <TouchableOpacity
               style={styles.locationInput}
-              placeholder="Tijd (bijv. 10:00)"
-              placeholderTextColor="#888"
-              value={newTime}
-              onChangeText={setNewTime}
-            />
+              onPress={() => setShowTimePicker(true)}
+            >
+              <Text style={{ color: newTime ? '#222' : '#888' }}>
+                {newTime ? newTime : 'Tijd (bijv. 10:00)'}
+              </Text>
+            </TouchableOpacity>
+            {showTimePicker && (
+              <DateTimePicker
+                value={newTime ? new Date(`1970-01-01T${newTime}`) : new Date()}
+                mode="time"
+                display="default"
+                onChange={(event, selectedTime) => {
+                  setShowTimePicker(false);
+                  if (selectedTime) {
+                    const hours = selectedTime.getHours().toString().padStart(2, '0');
+                    const minutes = selectedTime.getMinutes().toString().padStart(2, '0');
+                    setNewTime(`${hours}:${minutes}`);
+                  }
+                }}
+              />
+            )}
             {/* Datum veld met custom kalender */}
             <TouchableOpacity
               style={styles.locationInput}
