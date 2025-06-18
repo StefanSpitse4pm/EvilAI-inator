@@ -9,12 +9,10 @@ import Login from './login';
 import { ActivityIndicator } from 'react-native';
 import { AuthContext } from '@/context/AuthContext';
 import Notities from "./screens/Notities";
-import SettingsScreen from './screens/Settings';
 import { Image } from 'react-native';
-import { ThemeProvider } from './Theme/ThemeContext';
 import Map from './screens/map';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import Agenda from './screens/agenda'; 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator(); 
 
@@ -65,7 +63,7 @@ const AppStack = () => (
         />
         <Tab.Screen
           name="Agenda"
-          component={Homescreen}
+          component={Agenda}
           options={{
             tabBarIcon: ({ color, size }: { color: string; size: number }) => (
               <Ionicons name="calendar" size={size} color={color} />

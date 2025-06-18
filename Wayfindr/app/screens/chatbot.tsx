@@ -3,7 +3,7 @@ import { View, ScrollView, TextInput, StyleSheet, TouchableOpacity, Text, Keyboa
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ChatMenu, { ChatMenuHandle } from "../components/chatMenus";
-import UniversalHeader from "./components/universalHeader";
+import UniversalHeader from "../components/universalHeader";
 
 // const API_BASE_URL = 'http://141.252.152.178:8000';
 const API_BASE_URL = 'http://192.168.2.17:8000';
