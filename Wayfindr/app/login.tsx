@@ -3,14 +3,14 @@ import { View, TextInput, Button, Text, StyleSheet } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AuthContext } from '../context/AuthContext'
 
-const API_BASE_URL = 'http://192.168.2.17:8000';
+const API_BASE_URL = 'http://141.252.152.178:8000';
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [voornaam, setVoornaam] = useState("");
+    const [achternaam, setAchternaam] = useState("");
     const [error, setError] = useState("");
-    const [voornaam, setVoornaam] = useState("")
-    const [achternaam, setAchternaam] = useState("")
     const [isRegister, setIsRegister] = useState(false);
     const { signIn } = useContext(AuthContext);
 
@@ -62,6 +62,7 @@ const Login = () => {
         const response = await fetch(`${API_BASE_URL}/user/`, {
             method: "POST",
             headers: {
+                'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -130,6 +131,19 @@ const Login = () => {
                             value={achternaam}
                             onChangeText={setAchternaam}
                             autoCapitalize="none"
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Voornaam"
+                            value={voornaam}
+                            onChangeText={setVoornaam}
+                        />
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Achternaam"
+                            value={achternaam}
+                            onChangeText={setAchternaam}
                         />
                         <TextInput
                             style={styles.input}
