@@ -1,6 +1,7 @@
 import 'react-native-reanimated';
 import { Stack } from "expo-router";
-import { AuthProvidor } from '../context/AuthContext'import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AuthProvidor } from '../context/AuthContext'
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
 
 export default function RootLayout() {

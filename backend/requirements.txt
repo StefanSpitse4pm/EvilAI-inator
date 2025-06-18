@@ -7,3 +7,4 @@ slowapi
 limits
 starlette
 asyncmy
+aiomysql

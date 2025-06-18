@@ -2,13 +2,19 @@ import React, {use, useContext, useEffect, useState} from 'react';
 import { Text, View } from "react-native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from '@expo/vector-icons';
 import Homescreen from './screens/homescreen';
 import Chatbot from './screens/chatbot'
 import Login from './login';
 import { ActivityIndicator } from 'react-native';
 import { AuthContext } from '@/context/AuthContext';
+import Notities from "./screens/Notities";
+import SettingsScreen from './screens/Settings';
+import { Image } from 'react-native';
+import { ThemeProvider } from './Theme/ThemeContext';
+import Map from './screens/map';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator(); 
 
@@ -23,44 +29,7 @@ const AuthStack = () => (
 )
 
 const AppStack = () => (
-    <Tab.Navigator
-    screenOptions={{
-      headerShown:false,
-    }}
-    >
-      <Tab.Screen name="Home" component={Homescreen}/>
-      <Tab.Screen name="AI" component={Chatbot}/>
-    </Tab.Navigator>
-  
-  )
 
-export default function Index() {
-  const { isAuthenticated } = useContext(AuthContext)   
-  console.log(isAuthenticated);  
-  if (isAuthenticated === null) {
-    return(
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" />
-        </View> 
-    )}
-  else if (isAuthenticated) {
-    return <AppStack/>
-  } else {
-    return (
-    <AuthStack/>
-  )}
-import Chatbot from './screens/chatbot';
-import Notities from "./screens/Notities";
-import SettingsScreen from './screens/Settings';
-import { Image } from 'react-native';
-import { ThemeProvider } from './Theme/ThemeContext';
-import Map from './screens/map';
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-
-const Tab = createBottomTabNavigator();
-
-function Index() {
-  return (
     <GestureHandlerRootView style={{flex: 1}}>
       <Tab.Navigator screenOptions={{ headerShown: false }}>
         <Tab.Screen
@@ -114,7 +83,21 @@ function Index() {
         />
       </Tab.Navigator>
     </GestureHandlerRootView>
-  );
-}
+  )
 
-export default Index();
+export default function Index() {
+  const { isAuthenticated } = useContext(AuthContext)   
+  console.log(isAuthenticated);  
+  if (isAuthenticated === null) {
+    return(
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" />
+        </View> 
+    )}
+  else if (isAuthenticated) {
+    return <AppStack/>
+  } else {
+    return (
+    <AuthStack/>
+  )}
+}
