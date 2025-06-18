@@ -79,30 +79,46 @@ if [[ $CHOICE == *"wayfindrdb"* ]]; then
     mysql -u root -e "USE WayfindrDB;
     CREATE TABLE IF NOT EXISTS User (
         id INT AUTO_INCREMENT PRIMARY KEY,
+        firstName VARCHAR(255) NOT NULL,
+        lastName VARCHAR(255) NOT NULL,
         username VARCHAR(50) NOT NULL,
-        password VARCHAR(50) NOT NULL,
-        email VARCHAR(100) NOT NULL
+        password VARCHAR(500) NOT NULL,
+        description TEXT,
+        profilePicture BLOB,
+        phoneNumber VARCHAR(15)
     );
     CREATE TABLE IF NOT EXISTS Conversation (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT,
-        FOREIGN KEY (user_id) REFERENCES User(id),
-        start_time DATETIME,
-        end_time DATETIME
+        userId INT,
+        FOREIGN KEY (userId) REFERENCES User(id),
+        createdAt DATETIME,
+        chatName VARCHAR(255)
     );
     CREATE TABLE IF NOT EXISTS Prompt (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        conversation_id INT,
-        FOREIGN KEY (conversation_id) REFERENCES Conversation(id),
-        prompt_text TEXT,
-        response_text TEXT
+        conversationId INT,
+        FOREIGN KEY (conversationId) REFERENCES Conversation(id),
+        message TEXT,
+        response TEXT
     );
     CREATE TABLE IF NOT EXISTS Note (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT,
-        FOREIGN KEY (user_id) REFERENCES User(id),
-        note_text TEXT,
-        created_at DATETIME
+        userId INT,
+        FOREIGN KEY (userId) REFERENCES User(id),
+        title VARCHAR(255),
+        note TEXT,
+        createdAt DATETIME,
+        lastUpdated DATETIME,
+        color CHAR(7)
+    );
+    CREATE TABLE IF NOT EXISTS Agenda (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        userId INT,
+        FOREIGN KEY (userId) REFERENCES User(id),
+        title VARCHAR(255),
+        startTime DATETIME,
+        endTime DATETIME,
+        color CHAR(7)
     );" &> /dev/null
     echo -ne "\r* WayfindrDB database creation complete.\n"
 fi
