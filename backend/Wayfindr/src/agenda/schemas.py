@@ -5,7 +5,9 @@ from datetime import datetime
 class AgendaBase(BaseModel):
     title: str
     startTime: datetime
-    endTime: datetime
+    color: str | None = None
+    category: str | None = None
+    location: str | None = None  # <-- added
 
 class AgendaCreate(AgendaBase):
     pass

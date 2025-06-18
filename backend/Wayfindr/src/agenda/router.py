@@ -21,14 +21,18 @@ async def create_agenda(item: AgendaCreate, payload: dict = Depends(verify_token
         UserID=user['userId'],
         title=item.title,
         startTime=item.startTime,
-        endTime=item.endTime
+        color=item.color,
+        category=item.category,
+        location=item.location  # <-- added
     )
     await execute(
         Agenda.__table__.insert().values(
             UserID=agenda.UserID,
             title=agenda.title,
             startTime=agenda.startTime,
-            endTime=agenda.endTime
+            color=agenda.color,
+            category=agenda.category,
+            location=agenda.location  # <-- added
         ),
         commit=True
     )
@@ -59,7 +63,9 @@ async def update_agenda(item: AgendaUpdate, payload: dict = Depends(verify_token
         ).values(
             title=item.title,
             startTime=item.startTime,
-            endTime=item.endTime
+            color=item.color,
+            category=item.category,
+            location=item.location  # <-- added
         ),
         commit=True
     )

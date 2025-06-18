@@ -9,5 +9,7 @@ class Agenda(Base):
     AgendaID: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     UserID: Mapped[int] = mapped_column(Integer, ForeignKey("User.userId"), nullable=False)
     startTime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    endTime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     title: Mapped[str] = mapped_column(VARCHAR(255), nullable=False)
+    color: Mapped[str] = mapped_column(VARCHAR(7), nullable=True)
+    category: Mapped[str] = mapped_column(VARCHAR(30), nullable=True)
+    location: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)

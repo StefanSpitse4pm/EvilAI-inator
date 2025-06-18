@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Calendar } from 'react-native-calendars';
@@ -13,6 +13,7 @@ type Afspraak = {
     date: string;
     category: CategoryType;
     location: string;
+    color: string;
 };
 
 // Opties en kleuren voor categorieën
@@ -36,12 +37,16 @@ const categorieUitleg = {
 
 // Voorbeelddata voor afspraken
 const initialAfspraken: Afspraak[] = [
-  { id: 1, title: 'Informatica', time: '10:00', date: '2025-05-28', category: 'Les', location: '' },
-  { id: 2, title: 'Project', time: '11:00', date: '2025-05-29', category: 'Kick-off', location: '' },
-  { id: 3, title: 'Engels', time: '12:00', date: '2025-05-30', category: 'Toets', location: '' },
-  { id: 4, title: 'Sport', time: '13:00', date: '2025-06-01', category: 'Activiteit', location: '' },
-  { id: 5, title: 'Presentatie', time: '14:00', date: '2025-06-02', category: 'Assessment', location: '' },
+  { id: 1, title: 'Informatica', time: '10:00', date: '2025-05-28', category: 'Les', location: '', color: '#9399FF' },
+  { id: 2, title: 'Project', time: '11:00', date: '2025-05-29', category: 'Kick-off', location: '', color: '#93FFA3' },
+  { id: 3, title: 'Engels', time: '12:00', date: '2025-05-30', category: 'Toets', location: '', color: '#FFA770' },
+  { id: 4, title: 'Sport', time: '13:00', date: '2025-06-01', category: 'Activiteit', location: '', color: '#FFFA70' },
+  { id: 5, title: 'Presentatie', time: '14:00', date: '2025-06-02', category: 'Assessment', location: '', color: '#FE5858' },
 ];
+
+// === ADD: API base URL and AUTH_TOKEN ===
+const API_BASE_URL = 'http://192.168.2.17:8000';
+const AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs';
 
 export default function Agenda() {
   // State hooks voor afspraken en modals
@@ -53,17 +58,50 @@ export default function Agenda() {
   const [newTitle, setNewTitle] = useState('');
   const [newTime, setNewTime] = useState('');
   const [newCategory, setNewCategory] = useState(categorieOpties[0]);
+  const [newColor, setNewColor] = useState(categoryColors[categorieOpties[0] as CategoryType]);
   const [newLocation, setNewLocation] = useState('');
   const [newDate, setNewDate] = useState('');
   const [dateInput, setDateInput] = useState('');
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showCustomCalendar, setShowCustomCalendar] = useState(false);
   const [editCategory, setEditCategory] = useState<CategoryType>(categorieOpties[0] as CategoryType);
+  const [editColor, setEditColor] = useState(categoryColors[categorieOpties[0] as CategoryType]);
 
   // State hooks voor foutmeldingen en feedback
   const [addError, setAddError] = useState('');
   const [editError, setEditError] = useState('');
   const [feedback, setFeedback] = useState('');
+
+  // === FETCH agendas from backend ===
+  useEffect(() => {
+    loadAgendas();
+  }, []);
+
+  const loadAgendas = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/agenda`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${AUTH_TOKEN}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch agendas');
+      const data = await response.json();
+      setAfspraken(
+        data.map((item: any) => ({
+          id: item.AgendaID,
+          title: item.title,
+          time: item.startTime ? new Date(item.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+          date: item.startTime ? item.startTime.split('T')[0] : '',
+          category: (item.category && categorieOpties.includes(item.category)) ? item.category : 'Les',
+          location: item.location || '', // <-- now from backend
+          color: item.color || categoryColors['Les'],
+        }))
+      );
+    } catch (error) {
+      setFeedback('Fout bij laden van afspraken');
+    }
+  };
 
   // Open modal om categorie en details van een bestaande afspraak te bewerken
   const openCategorieModal = (afspraak: Afspraak) => {
@@ -72,6 +110,7 @@ export default function Agenda() {
     setDateInput(afspraak.date || '');
     setNewTime(afspraak.time || '');
     setEditCategory(afspraak.category);
+    setEditColor(afspraak.color || categoryColors[afspraak.category]);
     setModalVisible(true);
   };
 
@@ -85,23 +124,39 @@ export default function Agenda() {
     };
 
   // Sla wijzigingen in locatie en datum op voor een bestaande afspraak
-  const handleSaveLocation = () => {
+  const handleSaveLocation = async () => {
     if (!selectedAfspraak) return;
     if (!dateInput || !newTime) {
       setEditError('Vul een geldige datum en tijd in.');
       return;
     }
-    setAfspraken(afspraken =>
-      afspraken.map(afspraak =>
-        afspraak.id === selectedAfspraak.id
-          ? { ...afspraak, location: locationInput, date: dateInput, time: newTime, category : editCategory}
-          : afspraak
-      )
-    );
-    setEditError('');
-    setModalVisible(false);
-    setFeedback('Afspraak bijgewerkt!');
-    setTimeout(() => setFeedback(''), 2000);
+    try {
+      const startTime = `${newDate}T${newTime}:00`;
+      const payload = {
+        AgendaID: selectedAfspraak.id,
+        title: selectedAfspraak.title,
+        startTime,
+        category: editCategory,
+        color: editColor,
+        location: locationInput, // <-- send location to backend
+      };
+      const response = await fetch(`${API_BASE_URL}/agenda`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${AUTH_TOKEN}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error('Failed to update agenda');
+      setEditError('');
+      setModalVisible(false);
+      setFeedback('Afspraak bijgewerkt!');
+      loadAgendas();
+      setTimeout(() => setFeedback(''), 2000);
+    } catch (error) {
+      setEditError('Fout bij bijwerken van afspraak');
+    }
   };
 
   // Open modal om een nieuwe afspraak toe te voegen
@@ -109,29 +164,43 @@ export default function Agenda() {
     setNewTitle('');
     setNewTime('');
     setNewCategory(categorieOpties[0]);
+    setNewColor(categoryColors[categorieOpties[0] as CategoryType]);
     setNewLocation('');
     setAddModalVisible(true);
   };
 
   // Voeg een nieuwe afspraak toe aan de lijst
-  const handleAddAfspraak = () => {
+  const handleAddAfspraak = async () => {
     if (!newTitle || !newTime || !newDate) {
       setAddError('Vul een titel, datum en tijd in.');
       return;
     }
-    const newAfspraak: Afspraak = {
-      id: afspraken.length ? afspraken[afspraken.length - 1].id + 1 : 1,
-      title: newTitle,
-      time: newTime,
-      date: newDate,
-      category: newCategory as CategoryType,
-      location: newLocation,
-    };
-    setAfspraken([...afspraken, newAfspraak]);
-    setAddError('');
-    setAddModalVisible(false);
-    setFeedback('Afspraak toegevoegd!');
-    setTimeout(() => setFeedback(''), 2000);
+    try {
+      const startTime = `${newDate}T${newTime}:00`;
+      const payload = {
+        title: newTitle,
+        startTime,
+        category: newCategory,
+        color: newColor,
+        location: newLocation, // <-- send location to backend
+      };
+      const response = await fetch(`${API_BASE_URL}/agenda`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${AUTH_TOKEN}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error('Failed to create agenda');
+      setAddError('');
+      setAddModalVisible(false);
+      setFeedback('Afspraak toegevoegd!');
+      loadAgendas();
+      setTimeout(() => setFeedback(''), 2000);
+    } catch (error) {
+      setAddError('Fout bij toevoegen van afspraak');
+    }
   };
 
   // Verwijder een afspraak uit de lijst met bevestiging
@@ -142,8 +211,21 @@ export default function Agenda() {
       `Weet je zeker dat je de afspraak "${afspraak?.title}" wilt verwijderen?`,
       [
         { text: 'Annuleren', style: 'cancel' },
-        { text: 'Verwijderen', style: 'destructive', onPress: () => {
-            setAfspraken(afspraken => afspraken.filter(afspraak => afspraak.id !== id));
+        { text: 'Verwijderen', style: 'destructive', onPress: async () => {
+            try {
+              const response = await fetch(`${API_BASE_URL}/agenda/${id}`, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${AUTH_TOKEN}`,
+                },
+              });
+              if (!response.ok) throw new Error('Failed to delete agenda');
+              setFeedback('Afspraak verwijderd!');
+              loadAgendas();
+              setTimeout(() => setFeedback(''), 2000);
+            } catch (error) {
+              setFeedback('Fout bij verwijderen van afspraak');
+            }
           }
         },
       ]
@@ -183,7 +265,7 @@ export default function Agenda() {
             <View style={[
               styles.afspraak,
               {
-                backgroundColor: categoryColors[item.category as CategoryType] || '#fff',
+                backgroundColor: item.color || categoryColors[item.category as CategoryType] || '#fff',
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between'
@@ -231,7 +313,10 @@ export default function Agenda() {
                     { backgroundColor: categoryColors[opt as CategoryType] },
                     editCategory === opt && styles.selectedColor
                   ]}
-                  onPress={() => setEditCategory(opt as CategoryType)}
+                  onPress={() => {
+                    setEditCategory(opt as CategoryType);
+                    setEditColor(categoryColors[opt as CategoryType]);
+                  }}
                 >
                 </TouchableOpacity>
               ))}
@@ -437,7 +522,10 @@ export default function Agenda() {
                     { backgroundColor: categoryColors[opt as CategoryType] },
                     newCategory === opt && styles.selectedColor
                   ]}
-                  onPress={() => setNewCategory(opt)}
+                  onPress={() => {
+                    setNewCategory(opt as CategoryType);
+                    setNewColor(categoryColors[opt as CategoryType]);
+                  }}
                 />
               ))}
             </View>
