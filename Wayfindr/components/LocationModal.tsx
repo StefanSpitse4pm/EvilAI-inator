@@ -87,13 +87,21 @@ export default function LocationModal({ location, visible, onClose, onZoomTo }: 
           </View>
         </ScrollView>
 
-        <View style={styles.modalFooter}>
-          <TouchableOpacity style={styles.zoomButton} onPress={onZoomTo}>
-            <Ionicons name="locate" size={20} color="#fff" />
-            <Text style={styles.zoomButtonText}>Zoom to Location</Text>
-          </TouchableOpacity>
+          <View style={styles.modalFooter}>
+            <TouchableOpacity
+              style={styles.Button}
+              onPress={() => {
+                const url = 'https://nhl-stenden.officebooking.net/bookingengine#/workspaces/9';
+                import('react-native').then(({ Linking }) => {
+            Linking.openURL(url);
+                });
+              }}
+            >
+              <Ionicons name="log-out-outline" size={20} color="#fff" />
+              <Text style={styles.ButtonText}>Reserveer ruimte</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
     </Modal>
   );
 }
@@ -193,7 +201,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e2e8f0',
   },
-  zoomButton: {
+  Button: {
     backgroundColor: '#6366f1',
     flexDirection: 'row',
     alignItems: 'center',
@@ -201,7 +209,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
   },
-  zoomButtonText: {
+  ButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
