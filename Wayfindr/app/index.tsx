@@ -5,7 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Homescreen from './screens/homescreen';
 import Chatbot from './screens/chatbot';
-import Map from './screens/map';
+import AccountPage from './screens/accountpage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Tab = createBottomTabNavigator()
@@ -20,7 +20,7 @@ export default function Index() {
       >
         <Tab.Screen name="Home" component={Homescreen} />
         <Tab.Screen name="AI" component={Chatbot} />
-        <Tab.Screen name="Map" component={Map} />
+        <Tab.Screen name="Account" component={AccountPage} />
       </Tab.Navigator>
     </GestureHandlerRootView>
   );
