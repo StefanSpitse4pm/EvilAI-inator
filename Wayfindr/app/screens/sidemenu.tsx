@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { useTheme } from '../Theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 interface SlideMenuProps {
   isVisible: boolean;
@@ -14,7 +15,7 @@ export default function SlideMenu({ isVisible, onClose }: SlideMenuProps) {
   const navigation = useNavigation<NavigationProp<any>>();
   const { colors } = useTheme();
 
-
+  const { signOut } = useAuth();
   const slideAnim = useRef(new Animated.Value(-300)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -65,7 +66,7 @@ export default function SlideMenu({ isVisible, onClose }: SlideMenuProps) {
   const logoutItem = {
     icon: 'sign-out' as FontAwesomeIconName,
     label: 'Logout',
-    onPress: () => console.log('Logout pressed'),
+    onPress: () => signOut(),
   };
 
   if (!isVisible) return null;

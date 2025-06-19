@@ -6,6 +6,7 @@ import { AuthContext } from '../context/AuthContext'
 const API_BASE_URL = 'http://141.252.152.11:8000';
 
 const Login = () => {
+    const { token } = useContext(AuthContext);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [voornaam, setVoornaam] = useState("");
@@ -62,7 +63,7 @@ const Login = () => {
         const response = await fetch(`${API_BASE_URL}/user/`, {
             method: "POST",
             headers: {
-                'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+                'Authorization':`Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({

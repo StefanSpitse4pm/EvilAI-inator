@@ -14,6 +14,7 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const chatMenuHandeler = () => setIsVisible(prev => !prev);
     const [isLoading, setIsLoading] = useState(true);
+    const { token } = useAuth()
 
     interface Chat {
         id: number;
@@ -33,6 +34,7 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
 
     const fetchChats = () => {
         setIsLoading(true)
+        console.log("Fetching chats with token: ", token);
         fetch(`${API_BASE_URL}/conversations`,
         {
             method: 'GET',
