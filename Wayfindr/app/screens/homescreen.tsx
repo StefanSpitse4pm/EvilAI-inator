@@ -12,20 +12,35 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          onPress={() => setMenuVisible(true)}
-          style={styles.menuButton}
-        >
-          <FontAwesome name="bars" size={24} color="#333" />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: 16,
+          backgroundColor: colors.background === '#f8f9fa' ? '#005aa7' : colors.card,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        }}
+      >
+        <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuButton}>
+          <FontAwesome name="bars" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Home</Text>
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: 'bold',
+            color: 'white',
+            flex: 1,
+            textAlign: 'center',
+          }}
+        >
+          Home
+        </Text>
+        <View style={{ width: 32 }} /> {/* Placeholder for symmetry */}
       </View>
 
-      <SlideMenu 
-        isVisible={menuVisible}
-        onClose={() => setMenuVisible(false)}
-      />
+      <SlideMenu isVisible={menuVisible} onClose={() => setMenuVisible(false)} />
     </View>
   );
 }

@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import {
   PanGestureHandler,
@@ -13,7 +14,8 @@ import {
   PinchGestureHandlerGestureEvent,
   PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
-import Animated, {
+import Animated,
+{
   useAnimatedGestureHandler,
   useSharedValue,
   useAnimatedStyle,
@@ -26,11 +28,12 @@ import PrinterModal from '@/components/PrinterModal';
 import StaticMarker from '../../components/StaticMarker';
 import RoomMarker from '../../components/RoomMarker';
 import PrinterMarker from '../../components/PrinterMarker';
-import { Ionicons } from '@expo/vector-icons';
 import { SchoolLocation, schoolLocations } from '../../data/schooldata';
 import { staticMarkers } from '../../data/schoolprops';
 import { schoolRooms } from '../../data/schoolrooms';
 import { printerProps, PrinterProps } from '../../data/printerprops';
+import SlideMenu from './sidemenu'; // Adjust path if needed
+import { FontAwesome } from '@expo/vector-icons';
 
 // 📱 Schermdimensies
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -69,6 +72,7 @@ const getPanLimits = (scale: number) => {
 const MapScreen = () => {
   const [floor, setFloor] = useState(1); // Start op verdieping 1
   const [selectedLocation, setSelectedLocation] = useState<SchoolLocation | null>(null);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -175,7 +179,9 @@ const MapScreen = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>NHL Stenden - Map</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerTitle}>NHL Stenden - Map</Text>
+        </View>
         <View style={styles.floorControls}>
           <Text style={styles.floorText}>Verdieping: {floor}</Text>
           <View style={styles.buttonGroup}>
@@ -184,6 +190,14 @@ const MapScreen = () => {
           </View>
         </View>
       </View>
+
+      <TouchableOpacity
+        onPress={() => setMenuVisible(true)}
+        style={styles.fabMenuButton}
+        activeOpacity={0.8}
+      >
+        <FontAwesome name="bars" size={32} color="#fff" />
+      </TouchableOpacity>
 
       <PanGestureHandler onGestureEvent={panHandler}>
         <Animated.View style={{ flex: 1 }}>
@@ -284,6 +298,8 @@ const MapScreen = () => {
         onClose={() => setSelectedLocation(null)}
         onZoomTo={() => {}}
       />
+
+      <SlideMenu isVisible={menuVisible} onClose={() => setMenuVisible(false)} />
     </GestureHandlerRootView>
   );
 };
@@ -304,9 +320,29 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
+    textAlign: 'center',
+    flex: 1,
+    marginRight: 16, // space for menu button
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  menuButton: {
+    marginRight: 16,
+    width: 24,
+    height: 24,
+  },
+  addButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   floorControls: {
     marginTop: 5,
+    alignItems: 'center', 
   },
   floorText: {
     color: '#fff',
@@ -338,6 +374,22 @@ const styles = StyleSheet.create({
   absoluteWrapper: {
   width: imageWidth,
   height: imageHeight,
+  },
+  fabMenuButton: {
+    position: 'absolute',
+    left: 5,
+    top: '3%',
+    zIndex: 20,
+    borderRadius: 32,
+    width: 64,
+    height: 64,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
 });
 
