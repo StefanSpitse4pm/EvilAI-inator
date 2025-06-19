@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Modal, TextInput, Alert, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Calendar } from 'react-native-calendars';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import SlideMenu from './sidemenu';
 
 // Types en constanten
 type CategoryType = 'Les' | 'Kick-off' | 'Toets' | 'Activiteit' | 'Assessment';
@@ -44,6 +47,7 @@ const initialAfspraken: Afspraak[] = [
 ];
 
 export default function Agenda() {
+  const [menuVisible, setMenuVisible] = useState(false);
   // State hooks voor afspraken en modals
   const [afspraken, setAfspraken] = useState(initialAfspraken);
   const [modalVisible, setModalVisible] = useState(false);
@@ -151,14 +155,18 @@ export default function Agenda() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header met titel en plus-knop */}
-      <View style={styles.headerRow}>
-        <Text style={styles.header}>Afspraken</Text>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuButton}>
+          <FontAwesome name="bars" size={24} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Mijn Agenda</Text>
+        {/* Keep your original add button logic here */}
         <TouchableOpacity style={styles.addButton} onPress={openAddModal}>
           <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
       </View>
+
       {/* Feedbackmelding */}
       {feedback ? (
         <View style={{ backgroundColor: '#DFF0D8', padding: 10, borderRadius: 8, marginBottom: 10 }}>
@@ -171,41 +179,49 @@ export default function Agenda() {
           <Text style={{ color: '#888', fontSize: 16 }}>Nog geen afspraken gepland!</Text>
         </View>
       ) : (
-        <FlatList
-          data={[...afspraken].sort((a, b) => {
-            // Vergelijk eerst op datum, dan op tijd
-            const dateA = new Date(`${a.date}T${a.time}`);
-            const dateB = new Date(`${b.date}T${b.time}`);
-            return dateA.getTime() - dateB.getTime();
-          })}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={[
-              styles.afspraak,
-              {
-                backgroundColor: categoryColors[item.category as CategoryType] || '#fff',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }
-            ]}>
-              {/* Klikbaar: open bewerk-modal */}
-              <TouchableOpacity style={{ flex: 1 }} onPress={() => openCategorieModal(item)}>
-                <Text style={styles.titel}>{item.title}</Text>
-                <Text>{item.time}</Text>
-                <Text>{item.date}</Text>
-                <Text style={{ marginTop: 5, fontStyle: 'italic' }}>{item.category}</Text>
-                {item.location ? (
-                  <Text style={{ marginTop: 5, color: '#555' }}>📍 {item.location}</Text>
-                ) : null}
-              </TouchableOpacity>
-              {/* Verwijder-knop */}
-              <TouchableOpacity onPress={() => handleDeleteAfspraak(item.id)} style={styles.deleteButton}>
-                <Text style={styles.trashIcon}>🗑️</Text>
-              </TouchableOpacity>
+        <ScrollView style={styles.agendaList}>
+          {afspraken.length === 0 ? (
+            <View style={{ alignItems: 'center', marginTop: 40 }}>
+              <Text style={{ color: '#888', fontSize: 16 }}>Nog geen afspraken gepland!</Text>
             </View>
+          ) : (
+            <FlatList
+              data={[...afspraken].sort((a, b) => {
+                // Vergelijk eerst op datum, dan op tijd
+                const dateA = new Date(`${a.date}T${a.time}`);
+                const dateB = new Date(`${b.date}T${b.time}`);
+                return dateA.getTime() - dateB.getTime();
+              })}
+              keyExtractor={item => item.id.toString()}
+              renderItem={({ item }) => (
+                <View style={[
+                  styles.afspraak,
+                  {
+                    backgroundColor: categoryColors[item.category as CategoryType] || '#fff',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }
+                ]}>
+                  {/* Klikbaar: open bewerk-modal */}
+                  <TouchableOpacity style={{ flex: 1 }} onPress={() => openCategorieModal(item)}>
+                    <Text style={styles.titel}>{item.title}</Text>
+                    <Text>{item.time}</Text>
+                    <Text>{item.date}</Text>
+                    <Text style={{ marginTop: 5, fontStyle: 'italic' }}>{item.category}</Text>
+                    {item.location ? (
+                      <Text style={{ marginTop: 5, color: '#555' }}>📍 {item.location}</Text>
+                    ) : null}
+                  </TouchableOpacity>
+                  {/* Verwijder-knop */}
+                  <TouchableOpacity onPress={() => handleDeleteAfspraak(item.id)} style={styles.deleteButton}>
+                      <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
           )}
-        />
+        </ScrollView>
       )}
 
       {/* Bewerken modal */}
@@ -465,24 +481,69 @@ export default function Agenda() {
           </View>
         </View>
       </Modal>
-    </View>
+
+      <SlideMenu isVisible={menuVisible} onClose={() => setMenuVisible(false)} />
+    </SafeAreaView>
   );
 }
 
 // Stijlen voor de agenda
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  header: { fontSize: 24, fontWeight: 'bold', textAlign: 'center' },
+  container: {
+    flex: 1,
+    backgroundColor: '#f7f8fa',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#005aa7',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5EA',
+  },
+  menuButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    flex: 1,
+    textAlign: 'center',
+  },
   addButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 20,
-    width: 40,
-    height: 40,
+    borderRadius: 24,
+    width: 48,       
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  addButtonText: { color: '#fff', fontSize: 28, fontWeight: 'bold', marginTop: -2 },
+  addButtonText: {
+    color: '#f8f9fa',       
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginTop: -2,
+  },
+  agendaList: {
+    padding: 16, 
+  },
+  agendaCard: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   afspraak: { padding: 15, borderBottomWidth: 1, borderBottomColor: '#eee', borderRadius: 8, marginBottom: 10 },
   titel: { fontSize: 18, fontWeight: 'bold' },
   modalOverlay: {

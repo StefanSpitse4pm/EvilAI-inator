@@ -55,7 +55,7 @@ export default function SlideMenu({ isVisible, onClose }: SlideMenuProps) {
       icon: 'user' as FontAwesomeIconName,
       label: 'Account',
       onPress: () => {
-        navigation.navigate('Account');
+        navigation.navigate('account');
         onClose();
       },
     },

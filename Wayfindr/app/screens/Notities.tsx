@@ -188,7 +188,7 @@ export default function Notities() {
                 <TextInput
                   style={styles.titleInput}
                   placeholder="Note Title"
-                  placeholderTextColor={colors.background === '#f8f9fa' ? '#888' : colors.textSecondary}
+                  placeholderTextColor={colors.background === '#f8f9fa' ? '#888' : colors.text}
                   value={title}
                   onChangeText={setTitle}
                   maxLength={50}
@@ -376,13 +376,13 @@ const getStyles = (colors: any) =>
     },
     noteContent: {
       fontSize: 16,
-      color: colors.textSecondary,
+      color: colors.text,
       marginBottom: 8,
     },
     noteDate: {
       fontSize: 12,
       fontWeight: 'bold',
-      color: colors.textSecondary,
+      color: colors.text,
     },
     colorPickerContainer: {
       flexDirection: 'row',

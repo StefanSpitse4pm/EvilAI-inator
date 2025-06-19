@@ -4,6 +4,7 @@ import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, ScrollView,
 import { Ionicons } from '@expo/vector-icons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from '@react-navigation/native';
 
 interface UserProfile {
   name: string
@@ -12,6 +13,7 @@ interface UserProfile {
 }
 
 export default function AccountPage() {
+  const navigation = useNavigation();
   const [profile, setProfile] = useState<UserProfile>({
     name: "John Doe",
     description: "Avontuurlijke reiziger die graag nieuwe plekken ontdekt",
@@ -74,6 +76,9 @@ const handleImagePicker = async () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
+          <Ionicons name="arrow-back" size={28} color="#2c3e50" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Mijn Account</Text>
         <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(!isEditing)}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
