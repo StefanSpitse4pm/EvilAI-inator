@@ -4,7 +4,7 @@ import { MaterialCommunityIcons} from '@expo/vector-icons';
 import { AuthContext } from '@/context/AuthContext';
 
 // Define the API base URL here
-const API_BASE_URL = 'http://141.252.152.11:8000';
+const API_BASE_URL = 'https://api.tobiasschipper.tech';
 
 interface ChatMenuProps {
     onChangeChat: (chat: any[], conversationId: number) => void;

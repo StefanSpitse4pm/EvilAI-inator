@@ -21,7 +21,7 @@ import {
 import { useTheme } from '../Theme/ThemeContext';
 import { AuthContext } from '@/context/AuthContext';
 
-const API_BASE_URL = 'http://141.252.152.11:8000';
+const API_BASE_URL = 'https://api.tobiasschipper.tech';
 
 interface Note {
   id: string;

@@ -46,7 +46,7 @@ const initialAfspraken: Afspraak[] = [
 ];
 
 // === ADD: API base URL and AUTH_TOKEN ===
-const API_BASE_URL = 'http://141.252.152.11:8000';
+const API_BASE_URL = 'https://api.tobiasschipper.tech';
 
 export default function Agenda() {
   // State hooks voor afspraken en modals
