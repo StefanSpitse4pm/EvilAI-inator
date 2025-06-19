@@ -1,12 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useContext } from "react";
 import { View, ScrollView, TextInput, StyleSheet, TouchableOpacity, Text, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ChatMenu, { ChatMenuHandle } from "../components/chatMenus";
 import UniversalHeader from "../components/universalHeader";
+import { AuthContext } from '@/context/AuthContext';
 
-// const API_BASE_URL = 'http://141.252.152.178:8000';
-const API_BASE_URL = 'http://192.168.2.17:8000';
+
+const API_BASE_URL = 'http://141.252.152.11:8000';
 
 export default function Chatbot() {
   const [input, setInput] = useState('');
@@ -16,6 +17,7 @@ export default function Chatbot() {
   ]);
   const chatMenuRef = useRef<ChatMenuHandle | null>(null);
   const [conversationId, setConversationId] = useState<number | null>(null);
+  const { token } = useContext(AuthContext);
 
   const sendMessage = async () => {
     const userMessage = {
@@ -32,10 +34,9 @@ export default function Chatbot() {
     if (!currentConversationId) {
       try {
         const response = await fetch(`${API_BASE_URL}/conversation`, {
-          
             method: 'POST',
             headers: {
-                'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             }
         })
@@ -56,7 +57,7 @@ export default function Chatbot() {
       const response = await fetch(`${API_BASE_URL}/ask?message=${encodeURIComponent(input.trim())}&conversation_id=${currentConversationId}`, {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });

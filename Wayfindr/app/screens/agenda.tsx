@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Calendar } from 'react-native-calendars';
+import { AuthContext } from '@/context/AuthContext';
 
 // Types en constanten
 type CategoryType = 'Les' | 'Kick-off' | 'Toets' | 'Activiteit' | 'Assessment';
@@ -45,8 +46,7 @@ const initialAfspraken: Afspraak[] = [
 ];
 
 // === ADD: API base URL and AUTH_TOKEN ===
-const API_BASE_URL = 'http://192.168.2.17:8000';
-const AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs';
+const API_BASE_URL = 'http://141.252.152.11:8000';
 
 export default function Agenda() {
   // State hooks voor afspraken en modals
@@ -72,6 +72,8 @@ export default function Agenda() {
   const [editError, setEditError] = useState('');
   const [feedback, setFeedback] = useState('');
 
+  const { token } = useContext(AuthContext);
+
   // === FETCH agendas from backend ===
   useEffect(() => {
     loadAgendas();
@@ -82,7 +84,7 @@ export default function Agenda() {
       const response = await fetch(`${API_BASE_URL}/agenda`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${AUTH_TOKEN}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       if (!response.ok) throw new Error('Failed to fetch agendas');
@@ -144,7 +146,7 @@ export default function Agenda() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${AUTH_TOKEN}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -188,7 +190,7 @@ export default function Agenda() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${AUTH_TOKEN}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -216,7 +218,7 @@ export default function Agenda() {
               const response = await fetch(`${API_BASE_URL}/agenda/${id}`, {
                 method: 'DELETE',
                 headers: {
-                  'Authorization': `Bearer ${AUTH_TOKEN}`,
+                  'Authorization': `Bearer ${token}`,
                 },
               });
               if (!response.ok) throw new Error('Failed to delete agenda');

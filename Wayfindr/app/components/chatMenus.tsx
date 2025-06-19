@@ -1,9 +1,10 @@
-import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect, useContext } from 'react';
 import { Text, ScrollView, StyleSheet, View, SafeAreaView, Pressable, TouchableHighlight, TouchableOpacity, Animated, Dimensions} from 'react-native';
 import { MaterialCommunityIcons} from '@expo/vector-icons';
+import { AuthContext } from '@/context/AuthContext';
 
 // Define the API base URL here
-const API_BASE_URL = 'http://192.168.2.17:8000';
+const API_BASE_URL = 'http://141.252.152.11:8000';
 
 interface ChatMenuProps {
     onChangeChat: (chat: any[], conversationId: number) => void;
@@ -20,6 +21,7 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
         date: string;
     }
     const [chatData, setChatData] = useState<Chat[]>([])
+    const { token } = useContext(AuthContext);
 
     useEffect(() => {
         if (isVisible) {
@@ -35,7 +37,7 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
         {
             method: 'GET',
             headers: {
-                'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
         }
@@ -43,11 +45,10 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
         .then((data: any[]) => {
             Promise.all(
                 data.map(async (chat: any, index: number) => {
-                    console.log(chat)
                     const response = await fetch(`${API_BASE_URL}/prompts/` + chat['ConversationID'], {
                         method: 'GET',
                         headers: {
-                            'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+                            'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json',
                         }
                     });
@@ -106,7 +107,7 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
         fetch(`${API_BASE_URL}/conversation`, {
             method: 'POST',
             headers: {
-                'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             }
         })
@@ -130,9 +131,8 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
         
         const response = fetch(`${API_BASE_URL}/conversation/${chatId}`, {
             method: 'DELETE',
-
             headers: {
-                'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs',
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             }
         })

@@ -3,7 +3,7 @@ import { View, TextInput, Button, Text, StyleSheet } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AuthContext } from '../context/AuthContext'
 
-const API_BASE_URL = 'http://141.252.152.178:8000';
+const API_BASE_URL = 'http://141.252.152.11:8000';
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -134,19 +134,6 @@ const Login = () => {
                         />
                         <TextInput
                             style={styles.input}
-                            placeholder="Voornaam"
-                            value={voornaam}
-                            onChangeText={setVoornaam}
-                        />
-
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Achternaam"
-                            value={achternaam}
-                            onChangeText={setAchternaam}
-                        />
-                        <TextInput
-                            style={styles.input}
                             placeholder="Email"
                             value={email}
                             onChangeText={setEmail}
@@ -193,6 +180,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         paddingHorizontal: 12,
         fontSize: 16,
+        color: '#000'
     },
     error: {
         color: "red",

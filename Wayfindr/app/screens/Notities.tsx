@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
@@ -19,9 +19,9 @@ import {
   useColorScheme,
 } from 'react-native';
 import { useTheme } from '../Theme/ThemeContext';
+import { AuthContext } from '@/context/AuthContext';
 
-const API_BASE_URL = 'http://192.168.2.17:8000';
-const AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3b29Ad29vLmNvbSIsImV4cCI6NTM0OTE1NzE3OX0.uQxzGCNAuxY0n2pbIHz3cmuYwmgdm5BCY1ao3cTHSLs';
+const API_BASE_URL = 'http://141.252.152.11:8000';
 
 interface Note {
   id: string;
@@ -35,6 +35,7 @@ const colorOptions = ['#9399FF', '#93FFA3', '#FFA770', '#FFFA70', '#FE5858', '#0
 
 export default function Notities() {
   const { colors } = useTheme(); // Use theme context
+  const { token } = useContext(AuthContext); // Get token from context
 
   const styles = getStyles(colors);
 
@@ -56,7 +57,7 @@ export default function Notities() {
       const response = await fetch(`${API_BASE_URL}/note`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${AUTH_TOKEN}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       if (!response.ok) throw new Error('Failed to fetch notes');
@@ -97,7 +98,7 @@ export default function Notities() {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${AUTH_TOKEN}`,
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({ ...notePayload, id: Number(editingId) }),
         });
@@ -107,7 +108,7 @@ export default function Notities() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${AUTH_TOKEN}`,
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(notePayload),
         });
@@ -127,7 +128,7 @@ export default function Notities() {
       const response = await fetch(`${API_BASE_URL}/note/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${AUTH_TOKEN}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       if (!response.ok) throw new Error('Failed to delete note');
