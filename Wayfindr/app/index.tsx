@@ -14,6 +14,7 @@ import Map from './screens/map';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Agenda from './screens/agenda'; 
 import SettingsScreen from './screens/Settings';
+import AccountPage from './screens/accountpage';
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator(); 
 
@@ -91,6 +92,7 @@ const AppStack = () => (
   >
     <Stack.Screen name="tabs" component={tabStack} />
     <Stack.Screen name="Settings" component={SettingsScreen} />
+    <Stack.Screen name="account" component={AccountPage} />
   </Stack.Navigator>
 )
 

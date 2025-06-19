@@ -6,10 +6,12 @@ import ChatMenu, { ChatMenuHandle } from "../components/chatMenus";
 import UniversalHeader from "../components/universalHeader";
 import { AuthContext } from '@/context/AuthContext';
 
+import SlideMenu from "./sidemenu"; // <-- import your sidemenu
 
 const API_BASE_URL = 'https://api.tobiasschipper.tech';
 
 export default function Chatbot() {
+  const [menuVisible, setMenuVisible] = useState(false); // <-- add state
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
@@ -142,17 +144,17 @@ export default function Chatbot() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 90}
     >
       <UniversalHeader
-      title="Chatbot"
-      leftButton={{
-        icon: <MaterialCommunityIcons name="menu" size={28} color="#18aea9" />,
-        onPress: () => {},
-        style: { padding: 8 },
-      }}
-      rightButton={{
-        onPress: handleClick,
-        icon: <MaterialCommunityIcons name="folder-open" size={28} color="#18aea9" />,
-        style: { padding: 8 },
-      }}
+        title="Chatbot"
+        leftButton={{
+          icon: <MaterialCommunityIcons name="menu" size={28} color="white" />,
+          onPress: () => setMenuVisible(true),
+          style: { padding: 8 },
+        }}
+        rightButton={{
+          onPress: handleClick,
+          icon: <MaterialCommunityIcons name="folder-open" size={28} color="white" />,
+          style: { padding: 8 },
+        }}
       />
 
       <ScrollView style={styles.messageContainer} contentContainerStyle={{ paddingBottom: 16 }}>
@@ -190,6 +192,7 @@ export default function Chatbot() {
       </View>
       </View>
       <ChatMenu ref={chatMenuRef} onChangeChat={newChat} />
+      <SlideMenu isVisible={menuVisible} onClose={() => setMenuVisible(false)} />
     </KeyboardAvoidingView>
   );
 }

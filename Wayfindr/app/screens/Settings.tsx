@@ -194,11 +194,13 @@ export default function SettingsScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
       {/* Header with back button */}
-      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border, flexDirection: 'row', alignItems: 'center' }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
-          <Ionicons name="arrow-back" size={28} color={colors.text} />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 40, alignItems: 'flex-start' }}>
+          <Ionicons name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
+        <Text style={styles.headerTitle}>Settings</Text>
+        {/* Spacer to balance the back button */}
+        <View style={{ width: 40 }} />
       </View>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Language Section */}
@@ -345,21 +347,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   header: {
-    backgroundColor: '#fff',
+    backgroundColor: '#005aa7',
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between', // Ensure space between back, title, spacer
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: '#fff',
+    textAlign: 'center',
+    flex: 1,
   },
   scrollView: {
-    flex: 1,
+    flex: 1, 
   },
   sectionHeader: {
     flexDirection: 'row',
