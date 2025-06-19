@@ -179,49 +179,42 @@ export default function Agenda() {
           <Text style={{ color: '#888', fontSize: 16 }}>Nog geen afspraken gepland!</Text>
         </View>
       ) : (
-        <ScrollView style={styles.agendaList}>
-          {afspraken.length === 0 ? (
-            <View style={{ alignItems: 'center', marginTop: 40 }}>
-              <Text style={{ color: '#888', fontSize: 16 }}>Nog geen afspraken gepland!</Text>
+        <FlatList
+          style={styles.agendaList}
+          data={[...afspraken].sort((a, b) => {
+            // Vergelijk eerst op datum, dan op tijd
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
+            return dateA.getTime() - dateB.getTime();
+          })}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={[
+              styles.afspraak,
+              {
+                backgroundColor: categoryColors[item.category as CategoryType] || '#fff',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }
+            ]}>
+              {/* Klikbaar: open bewerk-modal */}
+              <TouchableOpacity style={{ flex: 1 }} onPress={() => openCategorieModal(item)}>
+                <Text style={styles.titel}>{item.title}</Text>
+                <Text>{item.time}</Text>
+                <Text>{item.date}</Text>
+                <Text style={{ marginTop: 5, fontStyle: 'italic' }}>{item.category}</Text>
+                {item.location ? (
+                  <Text style={{ marginTop: 5, color: '#555' }}>📍 {item.location}</Text>
+                ) : null}
+              </TouchableOpacity>
+              {/* Verwijder-knop */}
+              <TouchableOpacity onPress={() => handleDeleteAfspraak(item.id)} style={styles.deleteButton}>
+                  <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+              </TouchableOpacity>
             </View>
-          ) : (
-            <FlatList
-              data={[...afspraken].sort((a, b) => {
-                // Vergelijk eerst op datum, dan op tijd
-                const dateA = new Date(`${a.date}T${a.time}`);
-                const dateB = new Date(`${b.date}T${b.time}`);
-                return dateA.getTime() - dateB.getTime();
-              })}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({ item }) => (
-                <View style={[
-                  styles.afspraak,
-                  {
-                    backgroundColor: categoryColors[item.category as CategoryType] || '#fff',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }
-                ]}>
-                  {/* Klikbaar: open bewerk-modal */}
-                  <TouchableOpacity style={{ flex: 1 }} onPress={() => openCategorieModal(item)}>
-                    <Text style={styles.titel}>{item.title}</Text>
-                    <Text>{item.time}</Text>
-                    <Text>{item.date}</Text>
-                    <Text style={{ marginTop: 5, fontStyle: 'italic' }}>{item.category}</Text>
-                    {item.location ? (
-                      <Text style={{ marginTop: 5, color: '#555' }}>📍 {item.location}</Text>
-                    ) : null}
-                  </TouchableOpacity>
-                  {/* Verwijder-knop */}
-                  <TouchableOpacity onPress={() => handleDeleteAfspraak(item.id)} style={styles.deleteButton}>
-                      <Ionicons name="trash-outline" size={20} color="#FF3B30" />
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
           )}
-        </ScrollView>
+        />
       )}
 
       {/* Bewerken modal */}

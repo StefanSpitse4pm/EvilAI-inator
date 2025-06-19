@@ -8,13 +8,14 @@ import {
   Switch,
   Alert,
   StatusBar,
-  Appearance,
+  Linking,
+  Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { toast } from 'sonner-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../Theme/ThemeContext';
 
 interface SettingsItemProps {
   title: string;
@@ -32,108 +33,67 @@ interface ToggleItemProps {
   onValueChange: (value: boolean) => void;
 }
 
-import type { StatusBarStyle } from 'react-native';
-
-const themeColors: {
-  Light: {
-    background: string;
-    card: string;
-    text: string;
-    border: string;
-    icon: string;
-    statusBar: StatusBarStyle;
-  };
-  Dark: {
-    background: string;
-    card: string;
-    text: string;
-    border: string;
-    icon: string;
-    statusBar: StatusBarStyle;
-  };
-} = {
-  Light: {
-    background: '#f8f9fa',
-    card: '#fff',
-    text: '#1a1a1a',
-    border: '#e0e0e0',
-    icon: '#666',
-    statusBar: 'dark-content',
-  },
-  Dark: {
-    background: '#181a20',
-    card: '#23262f',
-    text: '#fff',
-    border: '#23262f',
-    icon: '#bbb',
-    statusBar: 'light-content',
-  },
-};
-
-const SettingsItem: React.FC<SettingsItemProps & { colors: typeof themeColors.Light }> = ({
+const SettingsItem: React.FC<SettingsItemProps> = ({
   title,
   subtitle,
   icon,
   onPress,
   rightElement,
   showChevron = true,
-  colors,
 }) => (
-  <TouchableOpacity style={[styles.settingsItem, { borderBottomColor: colors.border }]} onPress={onPress}>
+  <TouchableOpacity style={styles.settingsItem} onPress={onPress}>
     <View style={styles.itemLeft}>
-      <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
-        <Ionicons name={icon} size={20} color={colors.icon} />
+      <View style={styles.iconContainer}>
+        <Ionicons name={icon} size={20} color="#666" />
       </View>
       <View style={styles.textContainer}>
-        <Text style={[styles.itemTitle, { color: colors.text }]}>{title}</Text>
-        {subtitle && <Text style={[styles.itemSubtitle, { color: colors.icon }]}>{subtitle}</Text>}
+        <Text style={styles.itemTitle}>{title}</Text>
+        {subtitle && <Text style={styles.itemSubtitle}>{subtitle}</Text>}
       </View>
     </View>
     <View style={styles.itemRight}>
       {rightElement}
       {showChevron && !rightElement && (
-        <Ionicons name="chevron-forward" size={16} color={colors.border} />
+        <Ionicons name="chevron-forward" size={16} color="#e0e0e0" />
       )}
     </View>
   </TouchableOpacity>
 );
 
-const ToggleItem: React.FC<ToggleItemProps & { colors: typeof themeColors.Light }> = ({
+const ToggleItem: React.FC<ToggleItemProps> = ({
   title,
   subtitle,
   value,
   onValueChange,
-  colors,
 }) => (
-  <View style={[styles.settingsItem, { borderBottomColor: colors.border }]}>
+  <View style={styles.settingsItem}>
     <View style={styles.itemLeft}>
       <View style={styles.textContainer}>
-        <Text style={[styles.itemTitle, { color: colors.text }]}>{title}</Text>
-        {subtitle && <Text style={[styles.itemSubtitle, { color: colors.icon }]}>{subtitle}</Text>}
+        <Text style={styles.itemTitle}>{title}</Text>
+        {subtitle && <Text style={styles.itemSubtitle}>{subtitle}</Text>}
       </View>
     </View>
     <Switch
       value={value}
       onValueChange={onValueChange}
-      trackColor={{ false: colors.border, true: '#007AFF' }}
+      trackColor={{ false: '#e0e0e0', true: '#007AFF' }}
       thumbColor="#fff"
     />
   </View>
 );
 
-const SectionHeader: React.FC<{ title: string; icon: keyof typeof Ionicons.glyphMap; colors: typeof themeColors.Light }> = ({
+const SectionHeader: React.FC<{ title: string; icon: keyof typeof Ionicons.glyphMap }> = ({
   title,
   icon,
 }) => (
   <View style={styles.sectionHeader}>
     <Ionicons name={icon} size={18} color="#007AFF" />
-    <Text style={[styles.sectionTitle, { color: '#007AFF' }]}>{title}</Text>
+    <Text style={styles.sectionTitle}>{title}</Text>
   </View>
 );
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
-  const { theme, setTheme, colors } = useTheme();
 
   // Notification Settings
   const [agendaUpdates, setAgendaUpdates] = useState(true);
@@ -155,6 +115,8 @@ export default function SettingsScreen() {
   const [locationAccess, setLocationAccess] = useState(false);
   const [calendarAccess, setCalendarAccess] = useState(false);
 
+  // App Version Modal
+  const [versionModalVisible, setVersionModalVisible] = useState(false);
 
   const showPicker = (title: string, options: string[], currentValue: string, onSelect: (value: string) => void) => {
     Alert.alert(
@@ -180,7 +142,6 @@ export default function SettingsScreen() {
     );
   };
 
-
   const handlePermissionCheck = (type: string) => {
     toast.info(`${type} permission: ${type === 'Notification' ? 'Granted' : 'Not granted'}`);
   };
@@ -189,10 +150,9 @@ export default function SettingsScreen() {
     toast.success(`${type} submitted successfully`);
   };
 
-
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
       {/* Header with back button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 40, alignItems: 'flex-start' }}>
@@ -204,139 +164,135 @@ export default function SettingsScreen() {
       </View>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Language Section */}
-        <SectionHeader title="Language" icon="language-outline" colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <SectionHeader title="Language" icon="language-outline" />
+        <View style={styles.section}>
           <SettingsItem
             title="App Language"
             subtitle={language}
             icon="globe-outline"
-            onPress={() => showPicker('Language', ['English', 'Dutch', 'Spanish', 'French'], language, setLanguage)}
-            colors={colors}
+            onPress={() => showPicker('Language', ['English', 'Dutch'], language, setLanguage)}
           />
         </View>
 
         {/* Appearance Section */}
-        <SectionHeader title="Appearance" icon="color-palette-outline" colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
-          <SettingsItem
-            title="Theme"
-            subtitle={theme}
-            icon="moon-outline"
-            onPress={() =>
-              showPicker('Theme', ['Light', 'Dark', 'System default'], theme, setTheme)
-            }
-            colors={colors}
-          />
+        <SectionHeader title="Appearance" icon="color-palette-outline" />
+        <View style={styles.section}>
           <SettingsItem
             title="Text Size"
             subtitle={fontSize}
             icon="text-outline"
             onPress={() => showPicker('Font Size', ['Small', 'Medium', 'Large', 'Extra Large'], fontSize, setFontSize)}
-            colors={colors}
-          />
-        </View>
-
-        {/* Calendar Integration Section */}
-        <SectionHeader title="Calendar Integration" icon="calendar-outline" colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
-          <ToggleItem
-            title="Sync with Calendar"
-            subtitle="Google Calendar / Apple Calendar"
-            value={calendarSync}
-            onValueChange={setCalendarSync}
-            colors={colors}
-          />
-          <SettingsItem
-            title="Default Reminder Time"
-            subtitle={`${reminderTime} before class`}
-            icon="alarm-outline"
-            onPress={handleTimeSettings}
-            colors={colors}
-          />
-        </View>
-
-        {/* Privacy & Permissions Section */}
-        <SectionHeader title="Privacy & Permissions" icon="shield-checkmark-outline" colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
-          <ToggleItem
-            title="Location Access"
-            subtitle="For campus navigation"
-            value={locationAccess}
-            onValueChange={setLocationAccess}
-            colors={colors}
-          />
-          <ToggleItem
-            title="Calendar Access"
-            subtitle="Sync with device calendar"
-            value={calendarAccess}
-            onValueChange={setCalendarAccess}
-            colors={colors}
-          />
-          <SettingsItem
-            title="Notification Permissions"
-            subtitle="Check current permissions"
-            icon="checkmark-circle-outline"
-            onPress={() => handlePermissionCheck('Notification')}
-            colors={colors}
           />
         </View>
 
         {/* Support & Feedback Section */}
-        <SectionHeader title="Support & Feedback" icon="help-circle-outline" colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <SectionHeader title="Support & Feedback" icon="help-circle-outline" />
+        <View style={styles.section}>
           <SettingsItem
             title="Help / FAQ"
             subtitle="Get help and find answers"
             icon="help-outline"
-            onPress={() => toast.info('Opening help center...')}
-            colors={colors}
+            onPress={() => {
+              const url = 'https://www.nhlstenden.com/faq';
+              if (Platform.OS === 'web') {
+                window.open(url, '_blank');
+              } else {
+                Linking.openURL(url);
+              }
+            }}
           />
+
           <SettingsItem
             title="Report a Problem"
             subtitle="Let us know about issues"
             icon="bug-outline"
-            onPress={() => handleSupport('Bug report')}
-            colors={colors}
+            onPress={() => {
+              const url = 'https://www.nhlstenden.com/locaties';
+              if (Platform.OS === 'web') {
+                window.open(url, '_blank');
+              } else {
+                Linking.openURL(url);
+              }
+            }}
           />
           <SettingsItem
             title="Suggest a Feature"
             subtitle="Share your ideas"
             icon="bulb-outline"
-            onPress={() => handleSupport('Feature suggestion')}
-            colors={colors}
+            onPress={() => {
+              const url = 'https://www.nhlstenden.com/locaties';
+              if (Platform.OS === 'web') {
+                window.open(url, '_blank');
+              } else {
+                Linking.openURL(url);
+              }
+            }}
           />
         </View>
 
         {/* About Section */}
-        <SectionHeader title="About" icon="information-circle-outline" colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <SectionHeader title="About" icon="information-circle-outline" />
+        <View style={styles.section}>
           <SettingsItem
             title="App Version"
             subtitle="1.0.0 (Build 2025)"
             icon="code-outline"
-            showChevron={false}
-            colors={colors}
+            onPress={() => setVersionModalVisible(true)}
           />
           <SettingsItem
             title="Terms of Service"
             subtitle="Read our terms"
             icon="document-text-outline"
-            onPress={() => toast.info('Opening terms of service...')}
-            colors={colors}
+            onPress={() => {
+              const url = 'https://www.nhlstenden.com/over-nhl-stenden';
+              if (Platform.OS === 'web') {
+                window.open(url, '_blank');
+              } else {
+                Linking.openURL(url);
+              }
+            }}
           />
           <SettingsItem
             title="Privacy Policy"
             subtitle="How we protect your data"
             icon="lock-closed-outline"
-            onPress={() => toast.info('Opening privacy policy...')}
-            colors={colors}
+            onPress={() => {
+              const url = 'https://www.nhlstenden.com/over-nhl-stenden';
+              if (Platform.OS === 'web') {
+                window.open(url, '_blank');
+              } else {
+                Linking.openURL(url);
+              }
+            }}
           />
         </View>
 
         <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: colors.icon }]}>Copyright By Evil-AI-Inator</Text>
+          <Text style={styles.footerText}>Copyright By Evil-AI-Inator</Text>
         </View>
       </ScrollView>
+
+      {/* App Version Modal */}
+      <Modal
+        visible={versionModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setVersionModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.versionModalContent}>
+            <Text style={styles.versionModalTitle}>App Version</Text>
+            <Text style={styles.versionModalVersion}>1.0.0</Text>
+            <Text style={styles.versionModalBuild}>Build 2025</Text>
+            <TouchableOpacity
+              style={styles.closeModalButton}
+              onPress={() => setVersionModalVisible(false)}
+            >
+              <Text style={styles.closeModalButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -354,7 +310,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // Ensure space between back, title, spacer
+    justifyContent: 'space-between',
     position: 'absolute',
     top: 0,
     left: 0,
@@ -439,5 +395,47 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     fontStyle: 'italic',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  versionModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    minWidth: 250,
+    elevation: 5,
+  },
+  versionModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#005aa7',
+  },
+  versionModalVersion: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  versionModalBuild: {
+    fontSize: 18,
+    color: '#666',
+    marginBottom: 24,
+  },
+  closeModalButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+  },
+  closeModalButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });

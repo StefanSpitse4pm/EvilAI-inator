@@ -199,7 +199,7 @@ export default function HomeScreen() {
   };
 
   // Select a date
-  const selectDate = (date) => {
+  const selectDate = (date: Date | null) => {
     if (date) {
       setSelectedDate(date);
       toast.success(`Selected: ${date.toDateString()}`);
@@ -223,7 +223,7 @@ export default function HomeScreen() {
   };
 
   // Get activity icon based on type
-  const getActivityIcon = (type) => {
+  const getActivityIcon = (type: Activity['type']) => {
     switch (type) {
       case 'event':
         return <Ionicons name="calendar" size={24} color="#4285F4" />;
@@ -241,7 +241,7 @@ export default function HomeScreen() {
   };
 
   // Render activity item
-  const renderActivityItem = ({ item }) => (
+  const renderActivityItem = ({ item }: { item: Activity }) => (
     <View style={styles.activityCard}>
       <View style={styles.activityIconContainer}>
         {getActivityIcon(item.type)}

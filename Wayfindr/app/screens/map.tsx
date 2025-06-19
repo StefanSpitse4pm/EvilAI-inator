@@ -29,8 +29,7 @@ import RoomMarker from '../../components/RoomMarker';
 import { SchoolLocation, schoolLocations } from '../../data/schooldata';
 import { staticMarkers } from '../../data/schoolprops';
 import { schoolRooms } from '../../data/schoolrooms';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import SlideMenu from './sidemenu'; // Adjust path if needed
+import SlideMenu from './sidemenu';
 import { FontAwesome } from '@expo/vector-icons';
 
 // 📱 Schermdimensies
