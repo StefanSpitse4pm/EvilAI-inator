@@ -14,7 +14,6 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const chatMenuHandeler = () => setIsVisible(prev => !prev);
     const [isLoading, setIsLoading] = useState(true);
-    const { token } = useAuth()
 
     interface Chat {
         id: number;
