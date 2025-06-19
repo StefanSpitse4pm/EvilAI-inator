@@ -12,19 +12,19 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
-import { SchoolLocation } from '../data/schooldata';
+import { PrinterProps } from '../data/printerprops';
 
-interface LocationModalProps {
-  location: SchoolLocation | null;
+interface PrinterModalProps {
+  printer: PrinterProps | null;
   visible: boolean;
   onClose: () => void;
-  onZoomTo: () => void;
+  onZoomTo?: () => void;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 
-export default function LocationModal({ location, visible, onClose, onZoomTo }: LocationModalProps) {
-  if (!location) return null;
+export default function PrinterModal({ printer, visible, onClose, onZoomTo }: PrinterModalProps) {
+  if (!printer) return null;
 
   return (
     <Modal
@@ -36,10 +36,10 @@ export default function LocationModal({ location, visible, onClose, onZoomTo }: 
       <View style={styles.modalContent}>
         <View style={styles.modalHeader}>
           <View style={styles.headerLeft}>
-            <View style={[styles.iconContainer, { backgroundColor: location.color }]}>
-              <Ionicons name={location.icon as any} size={24} color="#fff" />
+            <View style={[styles.iconContainer, { backgroundColor: printer.color }]}>
+              <Ionicons name={printer.icon as any} size={24} color="#fff" />
             </View>
-            <Text style={styles.modalTitle}>{location.name}</Text>
+            <Text style={styles.modalTitle}>{printer.name}</Text>
           </View>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close" size={24} color="#64748b" />
@@ -54,31 +54,31 @@ export default function LocationModal({ location, visible, onClose, onZoomTo }: 
           />
 
           <View style={styles.infoSection}>
-            <Text style={styles.description}>{location.description}</Text>
+            <Text style={styles.description}>{printer.description}</Text>
 
             <View style={styles.detailsContainer}>
               <View style={styles.detailRow}>
           <Ionicons name="time-outline" size={20} color="#6366f1" />
-          <Text style={styles.detailText}>Hours: {location.hours}</Text>
+          <Text style={styles.detailText}>Hours: {printer.hours}</Text>
               </View>
 
               <View style={styles.detailRow}>
           <Ionicons name="location-outline" size={20} color="#6366f1" />
-          <Text style={styles.detailText}>Building: {location.building}</Text>
+          <Text style={styles.detailText}>Building: {printer.building}</Text>
               </View>
 
-              {location.phone && (
+              {printer.phone && (
           <View style={styles.detailRow}>
             <Ionicons name="call-outline" size={20} color="#6366f1" />
-            <Text style={styles.detailText}>{location.phone}</Text>
+            <Text style={styles.detailText}>{printer.phone}</Text>
           </View>
               )}
             </View>
 
-            {location.services && location.services.length > 0 && (
+            {printer.services && printer.services.length > 0 && (
               <View style={styles.servicesSection}>
-          <Text style={styles.servicesTitle}>Services Available:</Text>
-          {location.services.map((service, index) => (
+          <Text style={styles.servicesTitle}>Printer Functionaliteiten:</Text>
+          {printer.services.map((service, index) => (
             <View key={index} style={styles.serviceItem}>
               <Ionicons name="checkmark-circle" size={16} color="#10b981" />
               <Text style={styles.serviceText}>{service}</Text>
@@ -91,7 +91,7 @@ export default function LocationModal({ location, visible, onClose, onZoomTo }: 
             <TouchableOpacity
               style={styles.Button}
               onPress={() => {
-          const url = 'https://nhl-stenden.officebooking.net/bookingengine#/workspaces/9';
+          const url = 'https://nhlstenden.mycampusprint.nl/';
           if (Platform.OS === 'web') {
             window.open(url, '_blank');
           } else {
@@ -100,7 +100,7 @@ export default function LocationModal({ location, visible, onClose, onZoomTo }: 
               }}
             >
               <Ionicons name="log-out-outline" size={20} color="#fff" />
-              <Text style={styles.ButtonText}>Reserveer ruimte</Text>
+              <Text style={styles.ButtonText}>PrintPortal</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

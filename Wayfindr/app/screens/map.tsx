@@ -22,11 +22,15 @@ import Animated, {
 } from 'react-native-reanimated';
 import MapMarker from '../../components/MapMarker';
 import LocationModal from '../../components/LocationModal';
+import PrinterModal from '@/components/PrinterModal';
 import StaticMarker from '../../components/StaticMarker';
 import RoomMarker from '../../components/RoomMarker';
+import PrinterMarker from '../../components/PrinterMarker';
+import { Ionicons } from '@expo/vector-icons';
 import { SchoolLocation, schoolLocations } from '../../data/schooldata';
 import { staticMarkers } from '../../data/schoolprops';
 import { schoolRooms } from '../../data/schoolrooms';
+import { printerProps, PrinterProps } from '../../data/printerprops';
 
 // 📱 Schermdimensies
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -166,6 +170,8 @@ const MapScreen = () => {
     setSelectedLocation(location);
   };
 
+  const [selectedPrinter, setSelectedPrinter] = useState<PrinterProps | null>(null);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.header}>
@@ -227,6 +233,24 @@ const MapScreen = () => {
                       </View>
                     ))}
 
+                    {printerProps
+                    .filter((printer) => printer.floor === floor)
+                    .map((printer) => (
+                      <View
+                        key={printer.id}
+                        style={{
+                          position: 'absolute',
+                          left: printer.x,
+                          top: printer.y,
+                        }}
+                      >
+                        <PrinterMarker
+                          marker={printer}
+                          onPress={() => setSelectedPrinter(printer)}
+                        />
+                      </View>
+                  ))}
+
                   {staticMarkers
                     .filter((marker) => marker.floor === floor)
                     .map((marker) => (
@@ -247,6 +271,12 @@ const MapScreen = () => {
           </PinchGestureHandler>
         </Animated.View>
       </PanGestureHandler>
+
+      <PrinterModal
+        printer={selectedPrinter}
+        visible={!!selectedPrinter}
+        onClose={() => setSelectedPrinter(null)}
+      />
 
       <LocationModal
         location={selectedLocation}
