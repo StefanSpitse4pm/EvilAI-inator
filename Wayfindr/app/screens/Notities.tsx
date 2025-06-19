@@ -197,7 +197,7 @@ export default function Notities() {
                 <TextInput
                   style={styles.contentInput}
                   placeholder="Write your note here..."
-                  placeholderTextColor={colors.background === '#f8f9fa' ? '#888' : colors.textSecondary}
+                  placeholderTextColor={colors.background === '#f8f9fa' ? '#888' : colors.text}
                   value={content}
                   onChangeText={setContent}
                   multiline
