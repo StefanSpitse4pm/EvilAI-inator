@@ -13,6 +13,7 @@ import { Image } from 'react-native';
 import Map from './screens/map';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Agenda from './screens/agenda'; 
+import SettingsScreen from './screens/Settings';
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator(); 
 
@@ -26,8 +27,7 @@ const AuthStack = () => (
   </Stack.Navigator>
 )
 
-const AppStack = () => (
-
+const tabStack = () => (
     <GestureHandlerRootView style={{flex: 1}}>
       <Tab.Navigator screenOptions={{ headerShown: false }}>
         <Tab.Screen
@@ -81,7 +81,18 @@ const AppStack = () => (
         />
       </Tab.Navigator>
     </GestureHandlerRootView>
-  )
+)
+
+const AppStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerShown: false,
+    }}
+  >
+    <Stack.Screen name="tabs" component={tabStack} />
+    <Stack.Screen name="Settings" component={SettingsScreen} />
+  </Stack.Navigator>
+)
 
 export default function Index() {
   const { isAuthenticated } = useContext(AuthContext)   
