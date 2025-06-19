@@ -141,48 +141,52 @@ export default function Chatbot() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 90}
     >
       <UniversalHeader
-        title="Chatbot"
-        rightButton={{
-          onPress: handleClick,
-          icon: <MaterialCommunityIcons name="folder-open" size={28} color="#18aea9" />,
-          style: { padding: 8 },
-        }}
+      title="Chatbot"
+      leftButton={{
+        icon: <MaterialCommunityIcons name="menu" size={28} color="#18aea9" />,
+        onPress: () => {},
+        style: { padding: 8 },
+      }}
+      rightButton={{
+        onPress: handleClick,
+        icon: <MaterialCommunityIcons name="folder-open" size={28} color="#18aea9" />,
+        style: { padding: 8 },
+      }}
       />
 
       <ScrollView style={styles.messageContainer} contentContainerStyle={{ paddingBottom: 16 }}>
-        {messages.map(message => (
-          <MessageWrapper key={message.id} message={message} />
-        ))}
+      {messages.map(message => (
+        <MessageWrapper key={message.id} message={message} />
+      ))}
       </ScrollView>
       <View style={styles.inputBarShadow}>
-        <View style={styles.inputContainerModern}>
-          {/* Removed the folder icon button from here */}
-          <View style={styles.inputBoxModern}>
-            <TextInput
-              style={styles.mainInputModern}
-              value={input}
-              onChangeText={setInput}
-              multiline
-              placeholder="Stel een vraag..."
-              placeholderTextColor="#888"
-              underlineColorAndroid="transparent"
-            />
-            <TouchableOpacity
-              onPress={sendMessage}
-              style={[
-                styles.sendButtonModern,
-                input.trim() ? styles.sendButtonActive : styles.sendButtonDisabled
-              ]}
-              disabled={!input.trim()}
-            >
-              <MaterialCommunityIcons
-                name="send"
-                size={22}
-                color={input.trim() ? '#fff' : '#b0b0b0'}
-              />
-            </TouchableOpacity>
-          </View>
+      <View style={styles.inputContainerModern}>
+        <View style={styles.inputBoxModern}>
+        <TextInput
+          style={styles.mainInputModern}
+          value={input}
+          onChangeText={setInput}
+          multiline
+          placeholder="Stel een vraag..."
+          placeholderTextColor="#888"
+          underlineColorAndroid="transparent"
+        />
+        <TouchableOpacity
+          onPress={sendMessage}
+          style={[
+          styles.sendButtonModern,
+          input.trim() ? styles.sendButtonActive : styles.sendButtonDisabled
+          ]}
+          disabled={!input.trim()}
+        >
+          <MaterialCommunityIcons
+          name="send"
+          size={22}
+          color={input.trim() ? '#fff' : '#b0b0b0'}
+          />
+        </TouchableOpacity>
         </View>
+      </View>
       </View>
       <ChatMenu ref={chatMenuRef} onChangeChat={newChat} />
     </KeyboardAvoidingView>

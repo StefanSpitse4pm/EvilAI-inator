@@ -84,18 +84,19 @@ const AppStack = () => (
   )
 
 export default function Index() {
-  const { isAuthenticated } = useContext(AuthContext)   
-  console.log(isAuthenticated);  
-  if (isAuthenticated === null) {
-    return(
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" />
-        </View> 
-    )}
-  else if (isAuthenticated) {
-    return <AppStack/>
-  } else {
-    return (
-    <AuthStack/>
-  )}
+  return (<AppStack/>)
+  // const { isAuthenticated } = useContext(AuthContext)   
+  // console.log(isAuthenticated);  
+  // if (isAuthenticated === null) {
+  //   return(
+  //       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  //         <ActivityIndicator size="large" />
+  //       </View> 
+  //   )}
+  // else if (isAuthenticated) {
+  //   return <AppStack/>
+  // } else {
+  //   return (
+  //   <AuthStack/>
+  // )}
 }

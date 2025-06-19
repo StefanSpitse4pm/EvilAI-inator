@@ -51,7 +51,14 @@ export default function SlideMenu({ isVisible, onClose }: SlideMenuProps) {
   type FontAwesomeIconName = React.ComponentProps<typeof FontAwesome>['name'];
 
   const menuItems = [
-    { icon: 'user' as FontAwesomeIconName, label: 'Account', onPress: () => console.log('Account pressed') },
+    {
+      icon: 'user' as FontAwesomeIconName,
+      label: 'Account',
+      onPress: () => {
+        navigation.navigate('Account');
+        onClose();
+      },
+    },
     {
       icon: 'cog' as FontAwesomeIconName,
       label: 'Settings',
