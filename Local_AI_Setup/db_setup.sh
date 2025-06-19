@@ -68,8 +68,15 @@ if [[ $CHOICE == *"phpmyadmin"* ]]; then
     current_step=$((current_step + 1))
     update_progress $current_step $total_steps $current_step "Installing phpMyAdmin"
     DEBIAN_FRONTEND=noninteractive apt-get install -y phpmyadmin &> /dev/null
+
+    # Link phpMyAdmin config to Apache and enable it
+    sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf &> /dev/null
+    sudo a2enconf phpmyadmin &> /dev/null
+    sudo systemctl reload apache2
+
     echo -ne "\r* phpMyAdmin installation complete.\n"
 fi
+
 
 # Create WayfindrDB if selected
 if [[ $CHOICE == *"wayfindrdb"* ]]; then
