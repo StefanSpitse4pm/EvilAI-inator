@@ -103,7 +103,7 @@ export default function SettingsScreen() {
   const [notificationStyle, setNotificationStyle] = useState('Push');
 
   // Language & Appearance
-  const [language, setLanguage] = useState('English');
+  const [language, setLanguage] = useState('Dutch');
   const [fontSize, setFontSize] = useState('Medium');
   const [highContrast, setHighContrast] = useState(false);
 
@@ -170,7 +170,6 @@ export default function SettingsScreen() {
             title="App Language"
             subtitle={language}
             icon="globe-outline"
-            onPress={() => showPicker('Language', ['English', 'Dutch'], language, setLanguage)}
           />
         </View>
 
@@ -181,7 +180,6 @@ export default function SettingsScreen() {
             title="Text Size"
             subtitle={fontSize}
             icon="text-outline"
-            onPress={() => showPicker('Font Size', ['Small', 'Medium', 'Large', 'Extra Large'], fontSize, setFontSize)}
           />
         </View>
 

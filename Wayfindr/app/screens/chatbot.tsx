@@ -141,7 +141,7 @@ export default function Chatbot() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 90}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 90}
     >
       <UniversalHeader
         title="Chatbot"
@@ -173,6 +173,7 @@ export default function Chatbot() {
           placeholder="Stel een vraag..."
           placeholderTextColor="#888"
           underlineColorAndroid="transparent"
+          textAlignVertical="top"
         />
         <TouchableOpacity
           onPress={sendMessage}

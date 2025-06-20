@@ -73,14 +73,14 @@ export default function Notities() {
         }))
       );
     } catch (error) {
-      toast.error('Failed to load notes');
+      toast.error('Notities laden mislukt');
     }
   };
 
   // Save or update note via API
   const saveNote = async () => {
     if (!title.trim() || !content.trim()) {
-      toast.error('Please fill in both title and content');
+      toast.error('Vul zowel titel als inhoud in');
       return;
     }
 
@@ -116,9 +116,9 @@ export default function Notities() {
       if (!response.ok) throw new Error('Failed to save note');
       await loadNotes();
       resetForm();
-      toast.success(editingId ? 'Note updated successfully' : 'Note saved successfully');
+      toast.success(editingId ? 'Notitie succesvol bijgewerkt' : 'Notitie succesvol opgeslagen');
     } catch (error) {
-      toast.error('Failed to save note');
+      toast.error('Notitie opslaan mislukt');
     }
   };
 
@@ -133,9 +133,9 @@ export default function Notities() {
       });
       if (!response.ok) throw new Error('Failed to delete note');
       await loadNotes();
-      toast.success('Note deleted successfully');
+      toast.success('Notitie succesvol verwijderd');
     } catch (error) {
-      toast.error('Failed to delete note');
+      toast.error('Notitie verwijderen mislukt');
     }
   };
 
@@ -188,7 +188,7 @@ export default function Notities() {
               <Animated.View entering={FadeInUp} exiting={FadeOutDown} style={[styles.createNoteContainer]}>
                 <TextInput
                   style={styles.titleInput}
-                  placeholder="Note Title"
+                  placeholder="Titel notitie"
                   placeholderTextColor={colors.background === '#f8f9fa' ? '#888' : colors.text}
                   value={title}
                   onChangeText={setTitle}
@@ -196,7 +196,7 @@ export default function Notities() {
                 />
                 <TextInput
                   style={styles.contentInput}
-                  placeholder="Write your note here..."
+                  placeholder="Schrijf hier je notitie..."
                   placeholderTextColor={colors.background === '#f8f9fa' ? '#888' : colors.text}
                   value={content}
                   onChangeText={setContent}
@@ -214,10 +214,10 @@ export default function Notities() {
                 </View>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={resetForm}>
-                    <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
+                    <Text style={[styles.buttonText, styles.cancelButtonText]}>Annuleren</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={saveNote}>
-                    <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
+                    <Text style={[styles.buttonText, styles.saveButtonText]}>Opslaan</Text>
                   </TouchableOpacity>
                 </View>
               </Animated.View>
@@ -227,7 +227,7 @@ export default function Notities() {
       ) : (
         <ScrollView style={styles.notesList}>
           {notes.length === 0 ? (
-            <Text style={styles.emptyText}>No notes yet. Create one!</Text>
+            <Text style={styles.emptyText}>Nog geen notities. Maak er één aan!</Text>
           ) : (
             notes.map((note) => (
               <TouchableOpacity key={note.id} onPress={() => startEditing(note)} activeOpacity={0.9}>
