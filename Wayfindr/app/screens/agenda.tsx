@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from 'react';
+import { Alert, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
 // Types en constanten
@@ -59,6 +59,7 @@ export default function Agenda() {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showCustomCalendar, setShowCustomCalendar] = useState(false);
   const [editCategory, setEditCategory] = useState<CategoryType>(categorieOpties[0] as CategoryType);
+  const [editTitle, setEditTitle] = useState('');
 
   // State hooks voor foutmeldingen en feedback
   const [addError, setAddError] = useState('');
@@ -72,6 +73,7 @@ export default function Agenda() {
     setDateInput(afspraak.date || '');
     setNewTime(afspraak.time || '');
     setEditCategory(afspraak.category);
+    setEditTitle(afspraak.title); // Titel laden
     setModalVisible(true);
   };
 
@@ -94,7 +96,7 @@ export default function Agenda() {
     setAfspraken(afspraken =>
       afspraken.map(afspraak =>
         afspraak.id === selectedAfspraak.id
-          ? { ...afspraak, location: locationInput, date: dateInput, time: newTime, category : editCategory}
+          ? { ...afspraak, location: locationInput, date: dateInput, time: newTime, category: editCategory, title: editTitle }
           : afspraak
       )
     );
@@ -218,6 +220,13 @@ export default function Agenda() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalHeader}>Afspraak bewerken</Text>
+            <TextInput
+              style={styles.locationInput}
+              placeholder="Titel van de afspraak"
+              placeholderTextColor="#888"
+              value={editTitle}
+              onChangeText={setEditTitle}
+            />
             <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Selecteer een categorie.</Text>
             <Text style={{ color: '#888', marginBottom: 8, fontSize: 13 }}>
               {categorieUitleg[editCategory]}
