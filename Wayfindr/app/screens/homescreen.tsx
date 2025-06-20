@@ -40,10 +40,10 @@ const mockActivities: Activity[] = [
   },
   { 
     id: '2', 
-    title: 'Basketball Practice', 
+    title: 'football wesdstrijd', 
     date: new Date(2025, 5, 17),
     time: '3:30 PM', 
-    location: 'Gym', 
+    location: 'Football Field', 
     type: 'sports',
     isSchoolWide: false
   },
@@ -67,7 +67,7 @@ const mockActivities: Activity[] = [
   },
   { 
     id: '5', 
-    title: 'Think Wireles', 
+    title: 'Project Presentatie', 
     date: new Date(2025, 5, 20),
     time: '3:30 PM', 
     location: 'Auditorium', 
@@ -97,13 +97,13 @@ export default function HomeScreen() {
   const [menuVisible, setMenuVisible] = useState(false); // <-- Add this
   const navigation = useNavigation();
 
-  // Days of the week
-  const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  // Dagen van de week
+  const daysOfWeek = ['Z', 'M', 'D', 'W', 'D', 'V', 'Z'];
   
-  // Month names
+  // Maandnamen
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni',
+    'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December'
   ];
 
   // Simulate fetching activities from a database
@@ -202,11 +202,11 @@ export default function HomeScreen() {
   const selectDate = (date: Date | null) => {
     if (date) {
       setSelectedDate(date);
-      toast.success(`Selected: ${date.toDateString()}`);
+      toast.success(`Geselecteerd: ${date.toLocaleDateString('nl-NL', { weekday: 'long', month: 'long', day: 'numeric' })}`);
     }
   };
 
-  // Format date for display
+  // Datum formatteren voor weergave
   interface FormatDateOptions {
     weekday?: 'long' | 'short' | 'narrow';
     month?: 'long' | 'short' | 'narrow' | 'numeric' | '2-digit';
@@ -214,7 +214,7 @@ export default function HomeScreen() {
   }
 
   const formatDate = (date: Date, options?: FormatDateOptions): string => {
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleDateString('nl-NL', { 
       weekday: 'long',
       month: 'long', 
       day: 'numeric', 
@@ -240,7 +240,7 @@ export default function HomeScreen() {
     }
   };
 
-  // Render activity item
+  // Render activiteit item
   const renderActivityItem = ({ item }: { item: Activity }) => (
     <View style={styles.activityCard}>
       <View style={styles.activityIconContainer}>
@@ -265,20 +265,20 @@ export default function HomeScreen() {
           <FontAwesome name="bars" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Home</Text>
-        {/* Spacer to balance the back button */}
+        {/* Spacer om de titel te centreren */}
         <View style={{ width: 40 }} />
       </View>
       <ScrollView>
         {/* Header */}
 
-        <Text style={styles.tagline}>Excellence in Education</Text>
+        <Text style={styles.tagline}>Uitmuntendheid in Onderwijs</Text>
 
-        {/* Main Content Container */}
+        {/* Hoofdcontent container */}
         <View style={styles.mainContentContainer}>
-          {/* Mini Calendar Section */}
+          {/* Mini Kalender Sectie */}
           <View style={styles.miniCalendarContainer}>
             <View style={styles.calendarHeader}>
-              <Text style={styles.miniSectionTitle}>Calendar</Text>
+              <Text style={styles.miniSectionTitle}>Kalender</Text>
               <View style={styles.monthSelector}>
                 <TouchableOpacity onPress={goToPreviousMonth} style={styles.monthButton}>
                   <Ionicons name="chevron-back" size={18} color="#333" />
@@ -292,7 +292,7 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            {/* Days of week header */}
+            {/* Dagen van de week header */}
             <View style={styles.daysOfWeekContainer}>
               {daysOfWeek.map((day, index) => (
                 <Text 
@@ -307,7 +307,7 @@ export default function HomeScreen() {
               ))}
             </View>
 
-            {/* Calendar grid */}
+            {/* Kalender grid */}
             <View style={styles.calendarGrid}>
               {generateCalendarDays().map((item, index) => (
                 <TouchableOpacity
@@ -340,24 +340,24 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          {/* Selected Date Display */}
+          {/* Geselecteerde datum weergave */}
           <View style={styles.selectedDateContainer}>
             <Text style={styles.selectedDateText}>
               {formatDate(selectedDate)}
             </Text>
           </View>
 
-          {/* School-wide Activities Section */}
+          {/* Schoolbrede Activiteiten Sectie */}
           <View style={styles.activityFeedContainer}>
             <View style={styles.activityHeaderContainer}>
               <Ionicons name="school" size={22} color="#1A237E" />
-              <Text style={styles.sectionTitle}>School-wide Events</Text>
+              <Text style={styles.sectionTitle}>Schoolbrede evenementen</Text>
             </View>
             
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#4285F4" />
-                <Text style={styles.loadingText}>Loading activities...</Text>
+                <Text style={styles.loadingText}>Activiteiten laden...</Text>
               </View>
             ) : (
               <FlatList
@@ -366,23 +366,23 @@ export default function HomeScreen() {
                 scrollEnabled={false}
                 renderItem={renderActivityItem}
                 ListEmptyComponent={
-                  <Text style={styles.emptyListText}>No school-wide events for this day</Text>
+                  <Text style={styles.emptyListText}>Geen schoolbrede evenementen voor deze dag</Text>
                 }
               />
             )}
           </View>
 
-          {/* Personal Activities Section */}
+          {/* Persoonlijke Activiteiten Sectie */}
           <View style={styles.activityFeedContainer}>
             <View style={styles.activityHeaderContainer}>
               <Ionicons name="person" size={22} color="#1A237E" />
-              <Text style={styles.sectionTitle}>Your Activities</Text>
+              <Text style={styles.sectionTitle}>Jouw activiteiten</Text>
             </View>
             
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#4285F4" />
-                <Text style={styles.loadingText}>Loading activities...</Text>
+                <Text style={styles.loadingText}>Activiteiten laden...</Text>
               </View>
             ) : (
               <FlatList
@@ -391,7 +391,7 @@ export default function HomeScreen() {
                 scrollEnabled={false}
                 renderItem={renderActivityItem}
                 ListEmptyComponent={
-                  <Text style={styles.emptyListText}>No personal activities for this day</Text>
+                  <Text style={styles.emptyListText}>Geen persoonlijke activiteiten voor deze dag</Text>
                 }
               />
             )}
