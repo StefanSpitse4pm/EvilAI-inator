@@ -44,6 +44,7 @@ const ChatMenu = forwardRef(({ onChangeChat }: ChatMenuProps, ref) => {
         }
         ).then(response => response.json())
         .then((data: any[]) => {
+            console.log(data)
             Promise.all(
                 data.map(async (chat: any, index: number) => {
                     const response = await fetch(`${API_BASE_URL}/prompts/` + chat['ConversationID'], {
