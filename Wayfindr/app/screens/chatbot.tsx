@@ -6,12 +6,12 @@ import ChatMenu, { ChatMenuHandle } from "../components/chatMenus";
 import UniversalHeader from "../components/universalHeader";
 import { AuthContext } from '@/context/AuthContext';
 
-import SlideMenu from "./sidemenu"; // <-- import your sidemenu
+import SlideMenu from "./sidemenu"; 
 
 const API_BASE_URL = 'https://api.tobiasschipper.tech';
 
 export default function Chatbot() {
-  const [menuVisible, setMenuVisible] = useState(false); // <-- add state
+  const [menuVisible, setMenuVisible] = useState(false); 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
