@@ -32,7 +32,7 @@ const mockActivities: Activity[] = [
   { 
     id: '1', 
     title: 'School Assembly', 
-    date: new Date(2025, 5, 17), // June 17, 2025
+    date: new Date(2025, 5, 17),
     time: '8:30 AM', 
     location: 'Main Hall', 
     type: 'event',
@@ -41,7 +41,7 @@ const mockActivities: Activity[] = [
   { 
     id: '2', 
     title: 'Basketball Practice', 
-    date: new Date(2025, 5, 17), // June 17, 2025
+    date: new Date(2025, 5, 17),
     time: '3:30 PM', 
     location: 'Gym', 
     type: 'sports',
@@ -49,8 +49,8 @@ const mockActivities: Activity[] = [
   },
   { 
     id: '3', 
-    title: 'Science Fair Preparation', 
-    date: new Date(2025, 5, 18), // June 18, 2025
+    title: 'Science Fair', 
+    date: new Date(2025, 5, 18),
     time: '1:00 PM', 
     location: 'Science Lab', 
     type: 'academic',
@@ -58,8 +58,8 @@ const mockActivities: Activity[] = [
   },
   { 
     id: '4', 
-    title: 'Parent-Teacher Meeting', 
-    date: new Date(2025, 5, 19), // June 19, 2025
+    title: 'Game Night', 
+    date: new Date(2025, 5, 19),
     time: '5:00 PM', 
     location: 'Classrooms', 
     type: 'meeting',
@@ -67,19 +67,19 @@ const mockActivities: Activity[] = [
   },
   { 
     id: '5', 
-    title: 'Drama Club', 
-    date: new Date(2025, 5, 20), // June 20, 2025
+    title: 'Think Wireles', 
+    date: new Date(2025, 5, 20),
     time: '3:30 PM', 
     location: 'Auditorium', 
-    type: 'club',
+    type: 'event',
     isSchoolWide: false
   },
   { 
     id: '6', 
-    title: 'Field Trip - Museum', 
-    date: new Date(2025, 5, 21), // June 21, 2025
+    title: 'Open dag ', 
+    date: new Date(2025, 5, 21),
     time: '9:00 AM', 
-    location: 'City Museum', 
+    location: 'Hoofdingang', 
     type: 'event',
     isSchoolWide: true
   },
