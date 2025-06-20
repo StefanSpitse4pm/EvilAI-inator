@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, Modal, TextInput, Alert, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from 'react';
+import { Alert, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { AuthContext } from '@/context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -70,6 +72,7 @@ export default function Agenda() {
   const [showCustomCalendar, setShowCustomCalendar] = useState(false);
   const [editCategory, setEditCategory] = useState<CategoryType>(categorieOpties[0] as CategoryType);
   const [editColor, setEditColor] = useState(categoryColors[categorieOpties[0] as CategoryType]);
+  const [editTitle, setEditTitle] = useState('');
 
   // State hooks voor foutmeldingen en feedback
   const [addError, setAddError] = useState('');
@@ -117,6 +120,7 @@ export default function Agenda() {
     setNewTime(afspraak.time || '');
     setEditCategory(afspraak.category);
     setEditColor(afspraak.color || categoryColors[afspraak.category]);
+    setEditTitle(afspraak.title); // Titel laden
     setModalVisible(true);
   };
 
@@ -163,6 +167,17 @@ export default function Agenda() {
     } catch (error) {
       setEditError('Fout bij bijwerken van afspraak');
     }
+    setAfspraken(afspraken =>
+      afspraken.map(afspraak =>
+        afspraak.id === selectedAfspraak.id
+          ? { ...afspraak, location: locationInput, date: dateInput, time: newTime, category: editCategory, title: editTitle }
+          : afspraak
+      )
+    );
+    setEditError('');
+    setModalVisible(false);
+    setFeedback('Afspraak bijgewerkt!');
+    setTimeout(() => setFeedback(''), 2000);
   };
 
   // Open modal om een nieuwe afspraak toe te voegen
@@ -311,6 +326,13 @@ export default function Agenda() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalHeader}>Afspraak bewerken</Text>
+            <TextInput
+              style={styles.locationInput}
+              placeholder="Titel van de afspraak"
+              placeholderTextColor="#888"
+              value={editTitle}
+              onChangeText={setEditTitle}
+            />
             <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Selecteer een categorie.</Text>
             <Text style={{ color: '#888', marginBottom: 8, fontSize: 13 }}>
               {categorieUitleg[editCategory]}
